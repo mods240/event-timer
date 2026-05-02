@@ -255,6 +255,15 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-tt-row.is-locked-row{border-color:rgba(255,184,74,.15);}
 .live-tt-row.is-locked-row.is-active{border-color:var(--accent);}
 .lt-lock{font-size:14px;color:var(--warn);opacity:.9;text-align:center;}
+.lt-lock-static{font-size:14px;text-align:center;color:var(--warn);}
+.lt-lock-btn{
+  font-size:15px;text-align:center;cursor:pointer;
+  opacity:.35;transition:all .2s;
+  border-radius:3px;padding:2px;
+  user-select:none;
+}
+.lt-lock-btn:hover{opacity:1;transform:scale(1.15);}
+.lt-lock-btn.locked{opacity:.9;color:var(--warn);}
 .lt-time{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:var(--accent);}
 .live-tt-row.is-locked-row .lt-time{color:var(--warn);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
@@ -952,6 +961,20 @@ function publishLiveState(){
 }
 
 function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
+
+function toggleLiveLock(id){
+  const r=liveRows.find(r=>r.id===id);
+  if(!r)return;
+  r.locked=!r.locked;
+  // save back to storage
+  const ev=getEvent(currentEventId);
+  if(ev){
+    ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));
+    upsertEvent(ev);
+  }
+  publishLiveState();
+  liveRender();
+}
 function getEffStr(r){return minsToStr(getEff(r));}
 
 function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
@@ -1003,11 +1026,13 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const dh=Math.floor((diffSecs%86400)/3600);
     const dm=Math.floor((diffSecs%3600)/60);
     const ds=diffSecs%60;
+    const isFutureLive=(ttId==='live-tt-list');
     document.getElementById(ttId).innerHTML=rows.map(r=>{
       const rc='live-tt-row'+(r.locked?' is-locked-row':'');
-      const lockIcon=r.locked?'<div class="lt-lock">🔒</div>':'<div></div>';
-      const badge=r.locked?'<div class="lt-badge locked">🔒</div>':'';
-      return`<div class="${rc}">${lockIcon}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
+      const lockBtn=isFutureLive
+        ?`<div class="lt-lock-btn${r.locked?' locked':''}" onclick="toggleLiveLock(${r.id})" title="${r.locked?'クリックで解除':'クリックで固定'}">${r.locked?'🔒':'🔓'}</div>`
+        :`<div class="lt-lock-static">${r.locked?'🔒':''}</div>`;
+      return`<div class="${rc}">${lockBtn}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
     }).join('');
     document.getElementById(labelId).textContent=`イベント開始まで`;
     if(dd>0){
@@ -1056,12 +1081,17 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   const bf=sorted.length>0&&nowMins<eff(sorted[0]);
   const sm={};sorted.forEach((r,i)=>{if(i<ai)sm[r.id]='done';else if(i===ai)sm[r.id]='active';else if(i===ai+1||(ai===-1&&i===0&&bf))sm[r.id]='next';else sm[r.id]='upcoming';});
 
+  const isLiveView=(ttId==='live-tt-list');
   document.getElementById(ttId).innerHTML=rows.map(r=>{
     const st=sm[r.id]||'upcoming';
     const rc=['live-tt-row',st==='active'?'is-active':st==='done'?'is-done':st==='next'?'is-next':'',r.locked?'is-locked-row':''].filter(Boolean).join(' ');
-    const badge=st==='active'?'<div class="lt-badge active">進行中</div>':st==='done'?'<div class="lt-badge done">終了</div>':st==='next'?'<div class="lt-badge next">NEXT</div>':r.locked?'<div class="lt-badge locked">🔒</div>':'';
+    const badge=st==='active'?'<div class="lt-badge active">進行中</div>':st==='done'?'<div class="lt-badge done">終了</div>':st==='next'?'<div class="lt-badge next">NEXT</div>':'';
     const adj=!r.locked&&delay!==0?`<div class="lt-adj">→${minsToStr(eff(r))}</div>`:'';
-    return`<div class="${rc}">${r.locked?'<div class="lt-lock">🔒</div>':'<div></div>'}<div><div class="lt-time">${minsToStr(r.baseTime)}</div>${adj}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
+    // Lock button: clickable in live view, static icon in viewer
+    const lockBtn=isLiveView
+      ?`<div class="lt-lock-btn${r.locked?' locked':''}" onclick="toggleLiveLock(${r.id})" title="${r.locked?'クリックで解除':'クリックで固定'}">${r.locked?'🔒':'🔓'}</div>`
+      :`<div class="lt-lock-static">${r.locked?'🔒':''}</div>`;
+    return`<div class="${rc}">${lockBtn}<div><div class="lt-time">${minsToStr(r.baseTime)}</div>${adj}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
   }).join('');
 
   if(!sorted.length){
