@@ -1005,7 +1005,9 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const ds=diffSecs%60;
     document.getElementById(ttId).innerHTML=rows.map(r=>{
       const rc='live-tt-row'+(r.locked?' is-locked-row':'');
-      return`<div class="${rc}"><div></div><div><div class="lt-time">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
+      const lockIcon=r.locked?'<div class="lt-lock">🔒</div>':'<div></div>';
+      const badge=r.locked?'<div class="lt-badge locked">🔒</div>':'';
+      return`<div class="${rc}">${lockIcon}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
     }).join('');
     document.getElementById(labelId).textContent=`イベント開始まで`;
     if(dd>0){
