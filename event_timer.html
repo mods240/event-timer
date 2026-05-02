@@ -269,6 +269,58 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 ::-webkit-scrollbar{width:4px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(74,184,255,.16);border-radius:99px;}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:768px){
+  /* Viewer & Live: stack vertically */
+  .live-main,
+  #screen-viewer .live-main{
+    grid-template-columns:1fr !important;
+    grid-template-rows:65vh 35vh;
+    overflow:hidden;
+  }
+  .live-tt{
+    border-right:none !important;
+    border-bottom:2px solid var(--border);
+    padding:10px 14px !important;
+    overflow-y:auto;
+    height:65vh;
+  }
+  .live-cd{
+    padding:8px 12px !important;
+    overflow-y:auto;
+    height:35vh;
+    gap:5px !important;
+  }
+  /* Shrink live header on mobile */
+  .live-header{
+    flex-wrap:wrap;
+    padding:8px 12px !important;
+    gap:6px !important;
+  }
+  .lh-left{flex:1 1 100%;}
+  .delay-bar{flex:1 1 auto;justify-content:center;}
+  .lc-wrap{display:none;}
+  .lh-btns{flex:1 1 auto;justify-content:flex-end;}
+  /* Bigger tap targets */
+  .dbtn{width:36px !important;height:36px !important;font-size:16px !important;}
+  .d-apply{font-size:14px !important;padding:8px 14px !important;}
+  .lh-btn{font-size:12px !important;padding:7px 14px !important;}
+  /* Countdown compact on mobile */
+  .cd-big{font-size:52px !important;}
+  .cd-cur{padding:12px !important;}
+  /* Viewer header */
+  .viewer-header{flex-wrap:wrap;padding:8px 12px;gap:6px;}
+  /* Live TT rows bigger touch targets */
+  .live-tt-row{padding:10px 10px !important;margin-bottom:4px !important;}
+  .lt-label{font-size:15px !important;}
+  .lt-time{font-size:20px !important;}
+  /* Hide next-wrap on mobile to save space */
+  #vcd-next-wrap .cd-next-title{font-size:11px !important;}
+  #vcd-next-wrap .cd-ni{padding:6px 8px !important;}
+  #vcd-next-wrap .cd-ni-label{font-size:12px !important;}
+  #vcd-next-wrap .cd-ni-cd{font-size:17px !important;}
+}
 </style>
 </head>
 <body>
@@ -578,7 +630,17 @@ function openShareModal(){
     alert('Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。');
     return;
   }
-  const url=`${location.href.split('?')[0]}?view=${currentSessionId}`;
+  // Embed Firebase config in URL so viewers don't need to configure
+  const cfg=loadFbConfig()||{};
+  const params=new URLSearchParams({
+    view:currentSessionId,
+    ak:cfg.apiKey||'',
+    au:cfg.authDomain||'',
+    du:cfg.databaseURL||'',
+    pi:cfg.projectId||'',
+    ai:cfg.appId||''
+  });
+  const url=`${location.href.split('?')[0]}?${params.toString()}`;
   document.getElementById('share-url-text').textContent=url;
   const qrDiv=document.getElementById('share-qr');
   qrDiv.innerHTML='';
@@ -990,19 +1052,27 @@ function viewerRender(){
 
 /* ── BOOT ── */
 (function(){
-  // Check if viewer mode (?view=sessionId)
   const params=new URLSearchParams(location.search);
   const viewId=params.get('view');
 
-  // Load saved Firebase config
-  const savedCfg=loadFbConfig();
-  if(savedCfg)initFirebase(savedCfg);
-
   if(viewId){
-    // Viewer mode
+    // VIEWER MODE: try to get Firebase config from URL params first
+    const urlCfg={
+      apiKey:params.get('ak'),
+      authDomain:params.get('au'),
+      databaseURL:params.get('du'),
+      projectId:params.get('pi'),
+      appId:params.get('ai')
+    };
+    // Use URL config if present, otherwise fall back to saved config
+    const savedCfg=loadFbConfig();
+    const cfgToUse=(urlCfg.apiKey&&urlCfg.databaseURL)?urlCfg:savedCfg;
+    if(cfgToUse)initFirebase(cfgToUse);
     startViewerMode(viewId);
   } else {
-    // Check if Firebase is configured
+    // OPERATOR MODE
+    const savedCfg=loadFbConfig();
+    if(savedCfg)initFirebase(savedCfg);
     if(!savedCfg){
       showScreen('screen-fbsetup');
     } else {
