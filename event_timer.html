@@ -140,7 +140,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .wz-tt-actions{display:flex;gap:7px;}
 .tpl-btn{background:rgba(255,184,74,.07);border:1px solid rgba(255,184,74,.28);color:var(--warn);font-family:'Zen Kaku Gothic New',sans-serif;font-size:9px;letter-spacing:.18em;padding:5px 12px;border-radius:2px;cursor:pointer;transition:all .15s;}
 .tpl-btn:hover{background:rgba(255,184,74,.15);border-color:var(--warn);}
-.tt-col-headers{display:grid;grid-template-columns:26px 28px 94px 1fr 70px;gap:6px;padding:0 8px 6px;font-size:8px;letter-spacing:.2em;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px;}
+.tt-col-headers{display:grid;grid-template-columns:24px 26px 28px 94px 1fr 70px;gap:6px;padding:0 8px 6px;font-size:8px;letter-spacing:.2em;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px;}
 .tt-list{display:flex;flex-direction:column;gap:2px;margin-bottom:9px;}
 .tt-row{display:grid;grid-template-columns:24px 26px 28px 94px 1fr 70px;align-items:center;gap:6px;padding:7px 8px;border-radius:3px;border:1px solid transparent;transition:border-color .15s;position:relative;}
 .tt-row:hover{border-color:rgba(255,255,255,.06);}
@@ -451,7 +451,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
             <button class="tpl-btn" onclick="openTplSave()">💾 テンプレート保存</button>
           </div>
         </div>
-        <div class="tt-col-headers" style="grid-template-columns:24px 26px 28px 94px 1fr 70px"><div title="一括選択">選択</div><div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div></div>
+        <div class="tt-col-headers"><div title="一括選択">選択</div><div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div></div>
         <div class="tt-list" id="wz-tt-list"></div>
         <button class="btn-add-row" onclick="addWzRow()">＋ 末尾にパートを追加</button>
         <div class="bulk-shift-bar" id="bulk-shift-bar">
