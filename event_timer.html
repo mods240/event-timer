@@ -366,17 +366,33 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <div class="modal-overlay" id="modal-tpl-load"><div class="modal"><div class="modal-title">テンプレートから読み込み</div><div class="tpl-list" id="tpl-load-list"></div><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-load')">キャンセル</button></div></div></div>
 <div class="modal-overlay" id="modal-tpl-save"><div class="modal"><div class="modal-title">テンプレートとして保存</div><input class="modal-input" id="tpl-save-name" placeholder="テンプレート名（例：式典進行）" onkeydown="if(event.key==='Enter')doSaveTpl()"><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-save')">キャンセル</button><button class="mbtn mbtn-ok" onclick="doSaveTpl()">保存</button></div></div></div>
 <div class="modal-overlay" id="modal-share">
-  <div class="modal">
+  <div class="modal" style="max-width:480px;">
     <div class="modal-title">スタッフへ共有</div>
-    <div class="share-modal-inner">
-      <div id="share-qr"></div>
-      <div class="share-url-box" id="share-url-text"></div>
-      <div>
-        <button class="copy-btn" onclick="copyShareUrl()">URLをコピー</button>
-        <button class="mbtn mbtn-cancel" onclick="closeModal('modal-share')">閉じる</button>
-      </div>
-      <div class="share-hint">QRコードをカメラで読み取る、またはURLをメール・チャットで送付してください。<br>スタッフはClaudeアカウント不要で閲覧できます。</div>
+    <!-- Tab switcher -->
+    <div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+      <button id="share-tab-qr" onclick="switchShareTab('qr')"
+        style="flex:1;background:rgba(56,200,255,.15);border:none;color:var(--accent);font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.2em;padding:9px;cursor:pointer;transition:all .15s;">
+        📷 QRコード
+      </button>
+      <button id="share-tab-url" onclick="switchShareTab('url')"
+        style="flex:1;background:none;border:none;color:var(--muted);font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.2em;padding:9px;cursor:pointer;transition:all .15s;">
+        🔗 URL
+      </button>
     </div>
+    <!-- QR panel -->
+    <div id="share-panel-qr">
+      <div id="share-qr" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
+      <div style="text-align:center;font-size:10px;letter-spacing:.15em;color:var(--muted);">カメラでスキャンしてください</div>
+    </div>
+    <!-- URL panel -->
+    <div id="share-panel-url" style="display:none;">
+      <div class="share-url-box" id="share-url-text"></div>
+      <button class="copy-btn" onclick="copyShareUrl()" style="width:100%;margin-bottom:8px;">URLをコピー</button>
+    </div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+      <button class="mbtn mbtn-cancel" onclick="closeModal('modal-share')">閉じる</button>
+    </div>
+    <div class="share-hint" style="margin-top:10px;">スタッフはClaudeアカウント不要で閲覧できます。</div>
   </div>
 </div>
 
@@ -451,7 +467,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
             <button class="tpl-btn" onclick="openTplSave()">💾 テンプレート保存</button>
           </div>
         </div>
-        <div class="tt-col-headers"><div title="一括選択">選択</div><div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div></div>
+        <div class="tt-col-headers">
+  <div style="display:flex;align-items:center;justify-content:center;">
+    <input type="checkbox" id="bulk-select-all" title="全て選択" style="cursor:pointer;accent-color:var(--accent);width:14px;height:14px;" onchange="toggleSelectAll(this.checked)">
+  </div>
+  <div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div>
+</div>
         <div class="tt-list" id="wz-tt-list"></div>
         <button class="btn-add-row" onclick="addWzRow()">＋ 末尾にパートを追加</button>
         <div class="bulk-shift-bar" id="bulk-shift-bar">
@@ -689,16 +710,24 @@ function openShareModal(){
   document.getElementById('share-url-text').textContent=url;
   const qrDiv=document.getElementById('share-qr');
   qrDiv.innerHTML='';
-  new QRCode(qrDiv,{text:url,width:180,height:180,colorDark:'#e8f0f8',colorLight:'#0d1318'});
+  new QRCode(qrDiv,{text:url,width:260,height:260,colorDark:'#ffffff',colorLight:'#0d1318'});
   openModal('modal-share');
 }
 function copyShareUrl(){
   const url=document.getElementById('share-url-text').textContent;
   navigator.clipboard.writeText(url).then(()=>{
-    const btn=document.querySelector('.copy-btn');
-    btn.textContent='✓ コピーしました';
-    setTimeout(()=>btn.textContent='URLをコピー',2000);
+    const btn=document.querySelector('#share-panel-url .copy-btn');
+    if(btn){btn.textContent='✓ コピーしました';setTimeout(()=>btn.textContent='URLをコピー',2000);}
   });
+}
+function switchShareTab(tab){
+  const isQr=tab==='qr';
+  document.getElementById('share-panel-qr').style.display=isQr?'block':'none';
+  document.getElementById('share-panel-url').style.display=isQr?'none':'block';
+  document.getElementById('share-tab-qr').style.background=isQr?'rgba(56,200,255,.15)':'none';
+  document.getElementById('share-tab-qr').style.color=isQr?'var(--accent)':'var(--muted)';
+  document.getElementById('share-tab-url').style.background=isQr?'none':'rgba(56,200,255,.15)';
+  document.getElementById('share-tab-url').style.color=isQr?'var(--muted)':'var(--accent)';
 }
 
 /* ── TEMPLATE ── */
@@ -738,6 +767,10 @@ function applyTplRows(tpl){
 
 /* ── HOME ── */
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function toggleSelectAll(checked){
+  document.querySelectorAll('.bulk-cb').forEach(cb=>{ cb.checked=checked; });
+}
+
 function applyBulkShift(){
   const mins=parseInt(document.getElementById('bulk-shift-val').value)||0;
   if(mins===0){alert('シフトする分数を入力してください');return;}
@@ -851,8 +884,8 @@ function renderWzTable(){
     const bcbId=`wbulk-${r.id}`;
     return`<div class="tt-row${r.locked?' is-locked':''}" data-id="${r.id}" draggable="true" ondragstart="onDragStart(event,${r.id})" ondragend="onDragEnd()" ondragover="onDragOver(event,${r.id})" ondrop="onDrop(event,${r.id})">
       <div class="bulk-check"><input type="checkbox" class="bulk-cb" id="${bcbId}"><label class="bulk-lbl" for="${bcbId}" title="一括シフト対象に選択">✓</label></div>
-      <div class="drag-handle">⠿</div>
-      <div class="lock-toggle"><input type="checkbox" class="lock-cb" id="${cbId}" ${r.locked?'checked':''} onchange="toggleWzLocked(${r.id})"><label class="lock-lbl" for="${cbId}" title="${r.locked?'固定中':'クリックで固定'}">🔒</label></div>
+      <div class="drag-handle" title="ドラッグで並び替え">⠿</div>
+      <div class="lock-toggle"><input type="checkbox" class="lock-cb" id="${cbId}" ${r.locked?'checked':''} onchange="toggleWzLocked(${r.id})"><label class="lock-lbl" for="${cbId}" title="${r.locked?'🔒 固定中（クリックで解除）':'クリックで時刻を固定'}">🔒</label></div>
       <input class="tt-time" type="time" value="${minsToStr(r.baseTime)}" onchange="updateWzTime(${r.id},this.value)">
       <input class="tt-label" type="text" value="${esc(r.label)}" placeholder="パート名..." oninput="updateWzLabel(${r.id},this.value)">
       <div class="row-actions">
