@@ -827,7 +827,7 @@ function startWizard(editId){
   else{wzRows=[];wzNid=1;document.getElementById('wz-evname').value='';document.getElementById('wz-evdate').value='';addWzRow();}
   currentWzStep=1;setWzStep(1);showScreen('screen-wizard');
 }
-function loadWzFromEvent(ev){document.getElementById('wz-evname').value=ev.name||'';document.getElementById('wz-evdate').value=ev.date||'';wzNid=1;wzRows=ev.rows.map((r,i)=>({...r,id:i+1}));wzNid=wzRows.length+1;}
+function loadWzFromEvent(ev){document.getElementById('wz-evname').value=ev.name||'';document.getElementById('wz-evdate').value=ev.date||'';wzNid=1;wzRows=ev.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));wzNid=wzRows.length+1;}
 function goEdit(){stopLiveTick();const ev=getEvent(currentEventId);if(ev)loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
 function onEvNameInput(){document.getElementById('wz-next-btn').disabled=!document.getElementById('wz-evname').value.trim();}
 
@@ -924,7 +924,7 @@ function saveAndStartLive(){
 let liveTick=null,liveRows=[];
 function startLive(ev){
   const event=ev||getEvent(currentEventId);if(!event)return;
-  liveRows=event.rows.map((r,i)=>({...r,id:i+1}));
+  liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
   currentSessionId=event.id; // use event id as Firebase session key
   pendingDelay=0;appliedDelay=0;
   document.getElementById('delay-val').textContent='+0分';
@@ -1121,7 +1121,7 @@ function startViewerMode(sessionId){
   if(!fbDb){document.getElementById('vcd-sub').textContent='Firebase未接続。URLが正しいか確認してください。';return;}
 
   fbSubscribe(sessionId,data=>{
-    viewerRows=(data.rows||[]).map((r,i)=>({...r,id:i+1}));
+    viewerRows=(data.rows||[]).map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
     viewerDelay=data.appliedDelay||0;
     viewerEventDate=data.eventDate||'';
     document.getElementById('viewer-evname').textContent=data.eventName?`/ ${data.eventName}`:'';
