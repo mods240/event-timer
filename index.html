@@ -19,7 +19,7 @@
     --text:#ffffff;
     --muted:#7a96b0;
     --border:rgba(120,200,255,0.15);
-    --ad-h:90px; /* 広告エリアの高さ */
+    --ad-h:110px;
   }
 
   html,body{
@@ -47,17 +47,43 @@
     min-height:0;
   }
 
-  /* ── 広告エリア ── */
+  /* ── 下部バー ── */
   .ad-bar{
     flex-shrink:0;
     height:var(--ad-h);
     background:#0d1318;
     border-top:1px solid var(--border);
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
     position:relative;
     overflow:hidden;
+    gap:6px;
+  }
+
+  /* 利用ガイドリンク */
+  .guide-link{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:11px;
+    letter-spacing:.15em;
+    color:#38c8ff;
+    text-decoration:none;
+    background:rgba(56,200,255,.08);
+    border:1px solid rgba(56,200,255,.25);
+    border-radius:3px;
+    padding:4px 14px;
+    transition:all .15s;
+  }
+  .guide-link:hover{
+    background:rgba(56,200,255,.16);
+    border-color:rgba(56,200,255,.5);
+  }
+  @media(max-width:768px){
+    .guide-link{font-size:10px;padding:3px 10px;}
   }
 
   /* 広告ラベル */
@@ -112,7 +138,7 @@
   /* ── スマホ対応 ── */
   @media(max-width:768px){
     :root{
-      --ad-h:60px;
+      --ad-h:80px;
     }
     .ad-unit{
       max-width:320px;
@@ -135,6 +161,11 @@
 
   <!-- 広告エリア -->
   <div class="ad-bar">
+    <!-- 利用ガイドリンク -->
+    <a class="guide-link" href="event_timer_guide.pdf" target="_blank" download="EVENT_TIMER利用ガイド.pdf">
+      📄 利用ガイド（PDF）をダウンロード
+    </a>
+
     <div class="ad-label">広告</div>
 
     <!-- ▼▼▼ AdSense審査通過後、下のプレースホルダーをAdSenseコードに置き換えてください ▼▼▼ -->
