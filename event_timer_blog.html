@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVENT TIMER — イベントの「時間」、もう手放しにしていませんか？</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --muted: #666666;
+    --light: #f5f5f5;
+    --border: #e0e0e0;
+    --accent: #0066cc;
+    --accent-light: #e8f0fb;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 16px;
+    line-height: 1.9;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── HEADER ── */
+  .site-header {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 0;
+    text-align: center;
+  }
+  .site-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: .2em;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  /* ── ARTICLE WRAPPER ── */
+  .article {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 56px 24px 80px;
+  }
+
+  /* ── EYEBROW ── */
+  .eyebrow {
+    font-size: 11px;
+    letter-spacing: .35em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* ── TITLE ── */
+  h1 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: clamp(24px, 4vw, 34px);
+    font-weight: 700;
+    line-height: 1.45;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* ── SUBTITLE ── */
+  .subtitle {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── META ── */
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 48px;
+  }
+  .meta-dot { color: var(--border); }
+
+  /* ── LEAD ── */
+  .lead {
+    font-size: 17px;
+    line-height: 2.0;
+    color: #333;
+    margin-bottom: 40px;
+  }
+
+  /* ── QUOTE BLOCK ── */
+  .voice-block {
+    background: var(--light);
+    border-left: 3px solid var(--text);
+    padding: 20px 24px;
+    margin: 32px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .voice-block p {
+    font-size: 15px;
+    color: #444;
+    line-height: 1.8;
+    margin-bottom: 6px;
+  }
+  .voice-block p:last-child { margin-bottom: 0; }
+
+  /* ── SECTION HEADING ── */
+  h2 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 56px 0 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--text);
+  }
+
+  h3 {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 36px 0 12px;
+  }
+
+  /* ── BODY TEXT ── */
+  p {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.95;
+  }
+
+  /* ── FEATURE CARDS ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 28px 0 40px;
+  }
+  @media(max-width: 560px) {
+    .feature-grid { grid-template-columns: 1fr; }
+  }
+  .feature-card {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 18px 20px;
+    background: #fafafa;
+  }
+  .feature-card-icon {
+    font-size: 22px;
+    margin-bottom: 8px;
+    display: block;
+  }
+  .feature-card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+  .feature-card-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0;
+  }
+
+  /* ── USER LIST ── */
+  .user-list {
+    list-style: none;
+    margin: 20px 0 36px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  @media(max-width: 480px) { .user-list { grid-template-columns: 1fr; } }
+  .user-list li {
+    font-size: 14px;
+    color: #444;
+    padding: 10px 14px;
+    background: var(--light);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .user-list li::before {
+    content: '→';
+    color: var(--muted);
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* ── STEPS ── */
+  .steps {
+    counter-reset: step;
+    margin: 24px 0 36px;
+  }
+  .step-item {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 16px;
+    align-items: flex-start;
+  }
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--text);
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .step-text {
+    font-size: 15px;
+    color: #333;
+    line-height: 1.7;
+    padding-top: 4px;
+  }
+
+  /* ── CTA ── */
+  .cta-box {
+    background: var(--text);
+    color: white;
+    border-radius: 8px;
+    padding: 36px 32px;
+    text-align: center;
+    margin: 48px 0;
+  }
+  .cta-box h3 {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 20px;
+    color: white;
+    margin: 0 0 8px;
+  }
+  .cta-box p {
+    color: rgba(255,255,255,.7);
+    font-size: 13px;
+    margin: 0 0 24px;
+  }
+  .cta-btn {
+    display: inline-block;
+    background: white;
+    color: var(--text);
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: .05em;
+    padding: 12px 32px;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: opacity .15s;
+  }
+  .cta-btn:hover { opacity: .85; }
+
+  /* ── DIVIDER ── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 48px 0;
+  }
+
+  /* ── LANG SWITCH ── */
+  .lang-switch {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 40px 0 0;
+    padding: 32px 0;
+    border-top: 1px solid var(--border);
+  }
+  .lang-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 12px;
+    letter-spacing: .1em;
+    padding: 6px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .lang-btn.active {
+    background: var(--text);
+    border-color: var(--text);
+    color: white;
+  }
+  .lang-btn:hover:not(.active) {
+    border-color: var(--text);
+    color: var(--text);
+  }
+
+  /* ── LANG SECTIONS ── */
+  .lang-en { display: none; }
+  .lang-ja { display: block; }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 24px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .1em;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a class="site-name" href="https://mods240.github.io/event-timer/">EVENT TIMER</a>
+</header>
+
+<!-- LANG SWITCH -->
+<div class="lang-switch">
+  <button class="lang-btn active" onclick="switchLang('ja')">日本語</button>
+  <button class="lang-btn" onclick="switchLang('en')">English</button>
+</div>
+
+<!-- ══════════════════════════
+     JAPANESE VERSION
+══════════════════════════ -->
+<article class="article lang-ja" id="article-ja">
+
+  <div class="eyebrow">EVENT MANAGEMENT TOOL</div>
+
+  <h1>イベントが時間通りに進むなんてことは、<br>人生で何度あるのだろう・・・。</h1>
+  <p class="subtitle">進行担当者のためのリアルタイム進行管理ツール「EVENT TIMER」</p>
+
+  <div class="meta">
+    <span>イベント運営</span>
+    <span class="meta-dot">·</span>
+    <span>ツール紹介</span>
+    <span class="meta-dot">·</span>
+    <span>無料</span>
+  </div>
+
+  <p class="lead">イベントの本番中、こんなことありませんか？</p>
+
+  <div class="voice-block">
+    <p>「最初の出演者、持ち時間をかなりオーバーしている。。」</p>
+    <p>「どこかで調整したいけども、社長の出演時間はオンタイムで行かないとヤバいな・・・。」</p>
+    <p>「5分押しか・・。　場転の時間削れるかな？？　ここしかないな・・」</p>
+    <p>「調整した箇所を、全部各所に発報しなくては・・・」</p>
+  </div>
+
+  <p>現場の進行・演出しながら、時間調整して、映像・音響にキューを送る・・。<br>
+  一人でするには限界があるけど、俺しかできないか・・・。<br>
+  せめて、タイムキープだけでもスムースにできれば事故は起きないんだけど・・。</p>
+  <p>そんな現場の「あるある」を解決したくて、<strong>EVENT TIMER</strong>というツールを作りました。</p>
+
+  <h2>EVENT TIMERって何？</h2>
+
+  <p>ひとことで言うと、<strong>イベント当日のタイムテーブルをリアルタイムで管理して、音響・照明・映像スタッフと共有できるWebアプリ</strong>です。</p>
+  <p>ブラウザで動くのでインストール不要。スマホでもPCでもiPadでも使えます。</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feature-card-icon">⏱</span>
+      <div class="feature-card-title">リアルタイムカウントダウン</div>
+      <p class="feature-card-desc">現在パートの残り時間を秒単位で表示。次のパートまでの時間も一目でわかります。</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">🔒</span>
+      <div class="feature-card-title">時刻の固定（ロック）</div>
+      <p class="feature-card-desc">「社長登壇は絶対14:00から」はロックすれば何分押しでも動きません。</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">⚡</span>
+      <div class="feature-card-title">遅延調整</div>
+      <p class="feature-card-desc">「+5分」を押して反映するだけ。ロック以外のパートが自動でシフトされます。</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📡</span>
+      <div class="feature-card-title">スタッフへのリアルタイム共有</div>
+      <p class="feature-card-desc">QRコードかURLを送るだけ。スタッフの画面に即座に反映。アカウント不要。</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📋</span>
+      <div class="feature-card-title">テンプレート保存</div>
+      <p class="feature-card-desc">毎回似た構成のイベントはテンプレート化。次回は読み込んで時刻だけ調整。</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📅</span>
+      <div class="feature-card-title">開催日管理</div>
+      <p class="feature-card-desc">当日・前日以前・翌日以降で表示が自動で切り替わります。</p>
+    </div>
+  </div>
+
+  <h2>こんな人に使ってほしい</h2>
+
+  <ul class="user-list">
+    <li>コンサート・ライブのステージマネージャー</li>
+    <li>式典・セレモニーの進行担当</li>
+    <li>スポーツイベントの運営スタッフ</li>
+    <li>企業パーティー・表彰式の総務・広報</li>
+    <li>結婚式の司会・プランナー</li>
+    <li>学校の文化祭・体育祭の実行委員</li>
+  </ul>
+
+  <p>要は、<strong>「時間を管理しながらイベントを進行させる人」すべてに使ってほしい</strong>のです。</p>
+
+  <h2>使い方はシンプルです</h2>
+
+  <div class="steps">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">イベント名と開催日を入力する</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">タイムテーブルを組む（時刻・パート名・ロック設定）</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">「進行開始」を押す</div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">スタッフにQRコードかURLを共有する</div></div>
+  </div>
+
+  <p>あとは当日、画面を見ながら進行するだけ。タイムテーブルはドラッグで並び替えられるし、前日に何度でも修正できます。</p>
+
+  <div class="cta-box">
+    <h3>無料で使ってみる</h3>
+    <p>リアルタイム共有はFirebase（無料）の設定が必要です。<br>利用ガイド（PDF）をダウンロードすればステップバイステップで設定できます。</p>
+    <a class="cta-btn" href="https://mods240.github.io/event-timer/" target="_blank">EVENT TIMERを開く →</a>
+  </div>
+
+  <hr class="divider">
+
+  <p>このツールは「イベントの現場をもう少し楽にしたい」という一念で作りました。</p>
+  <p>どんなイベントも、時間通りに進むことはほぼありません。でも、<strong>「今何分押しているか」「次のパートまで何分あるか」をチーム全員が把握している状態</strong>は作れる。その状態を作るためのツールとして、ぜひ使ってみてください。</p>
+  <p style="color: var(--muted); font-size: 14px;">現場からのフィードバック、大歓迎です。</p>
+
+</article>
+
+<!-- ══════════════════════════
+     ENGLISH VERSION
+══════════════════════════ -->
+<article class="article lang-en" id="article-en">
+
+  <div class="eyebrow">EVENT MANAGEMENT TOOL</div>
+
+  <h1>Is Your Event Running on Time?<br>Probably Not — And That's Okay.</h1>
+  <p class="subtitle">Introducing EVENT TIMER: A real-time event management tool for show callers, stage managers, and event producers.</p>
+
+  <div class="meta">
+    <span>Event Production</span>
+    <span class="meta-dot">·</span>
+    <span>Tool</span>
+    <span class="meta-dot">·</span>
+    <span>Free</span>
+  </div>
+
+  <p class="lead">We've all been there.</p>
+
+  <div class="voice-block">
+    <p>"How long has the keynote been running…?"</p>
+    <p>"Lighting is asking how long until the next cue and I'm already three things behind."</p>
+    <p>"We're five minutes behind. Where do we make it up?"</p>
+  </div>
+
+  <p>Script in one hand, stopwatch in the other, radio on your hip. Live event production is a constant exercise in real-time math — and it's exhausting.</p>
+  <p>I built <strong>EVENT TIMER</strong> to take some of that mental load off your plate.</p>
+
+  <h2>What Is EVENT TIMER?</h2>
+
+  <p>EVENT TIMER is a <strong>browser-based, real-time event management tool</strong> designed for show callers, stage managers, and event producers. No installation required. Works on any device — smartphone, tablet, or desktop.</p>
+
+  <div class="feature-grid">
+    <div class="feature-card">
+      <span class="feature-card-icon">⏱</span>
+      <div class="feature-card-title">Live Countdown</div>
+      <p class="feature-card-desc">See exactly how much time remains in the current segment — down to the second.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">🔒</span>
+      <div class="feature-card-title">Time Lock</div>
+      <p class="feature-card-desc">Lock non-negotiable segments. They won't shift no matter how far behind schedule you run.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">⚡</span>
+      <div class="feature-card-title">Delay Adjustment</div>
+      <p class="feature-card-desc">Running 5 minutes behind? Hit "+5" and Apply. Every unlocked segment shifts automatically.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📡</span>
+      <div class="feature-card-title">Real-Time Staff Sharing</div>
+      <p class="feature-card-desc">Send a QR code or URL to your crew. Their screens update instantly. No account required.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📋</span>
+      <div class="feature-card-title">Template Library</div>
+      <p class="feature-card-desc">Save your rundown as a template. Load it next time, adjust the times, and go.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-card-icon">📅</span>
+      <div class="feature-card-title">Date Management</div>
+      <p class="feature-card-desc">Display adapts automatically — pre-event countdown, live show view, or post-event summary.</p>
+    </div>
+  </div>
+
+  <h2>Who Is This For?</h2>
+
+  <ul class="user-list">
+    <li>Stage managers & show callers</li>
+    <li>Corporate event producers</li>
+    <li>Sports event coordinators</li>
+    <li>Ceremony & gala planners</li>
+    <li>Wedding coordinators & MCs</li>
+    <li>School event committees</li>
+  </ul>
+
+  <p>In short: <strong>anyone who has ever stared at a clock during a live event and felt their heart rate spike.</strong></p>
+
+  <h2>Getting Started</h2>
+
+  <div class="steps">
+    <div class="step-item"><div class="step-num">1</div><div class="step-text">Name your event and set the date</div></div>
+    <div class="step-item"><div class="step-num">2</div><div class="step-text">Build your rundown — add start times, segment names, and lock the non-negotiables</div></div>
+    <div class="step-item"><div class="step-num">3</div><div class="step-text">Hit "Start Show"</div></div>
+    <div class="step-item"><div class="step-num">4</div><div class="step-text">Share the QR code or URL with your crew</div></div>
+  </div>
+
+  <p>That's it. The tool handles the math. You handle the show.</p>
+
+  <div class="cta-box">
+    <h3>Try It Free</h3>
+    <p>Real-time sharing requires a free Firebase setup.<br>A step-by-step PDF guide is available for download on the page.</p>
+    <a class="cta-btn" href="https://mods240.github.io/event-timer/" target="_blank">Open EVENT TIMER →</a>
+  </div>
+
+  <hr class="divider">
+
+  <p>No event runs perfectly on time. But there's a big difference between <em>chaos</em> and <em>controlled flexibility.</em></p>
+  <p>EVENT TIMER won't stop your keynote speaker from going long. But it will make sure your entire team knows exactly what that means for the rest of the show — in real time, without a single radio call.</p>
+  <p style="color: var(--muted); font-size: 14px; font-style: italic;">Built for the people who make events happen. Feedback always welcome.</p>
+
+</article>
+
+<footer>
+  <a href="https://mods240.github.io/event-timer/">EVENT TIMER</a> &nbsp;·&nbsp; Free to use &nbsp;·&nbsp; No installation required
+</footer>
+
+<script>
+function switchLang(lang) {
+  document.getElementById('article-ja').style.display = lang === 'ja' ? 'block' : 'none';
+  document.getElementById('article-en').style.display = lang === 'en' ? 'block' : 'none';
+  document.querySelectorAll('.lang-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', (i === 0 && lang === 'ja') || (i === 1 && lang === 'en'));
+  });
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>
