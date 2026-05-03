@@ -5,10 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Event Timer</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Zen+Kaku+Gothic+New:wght@300;400;700&display=swap" rel="stylesheet">
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<!-- QR Code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
@@ -23,11 +21,10 @@
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;height:100vh;overflow:hidden;}
 body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);pointer-events:none;z-index:200;}
-
 .screen{display:none;height:100vh;}
 .screen.active{display:flex;flex-direction:column;}
 
-/* ── MODAL ── */
+/* MODAL */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(4px);}
 .modal-overlay.open{display:flex;}
 .modal{background:#0d1318;border:1px solid var(--border);border-radius:6px;padding:28px 28px 22px;width:90%;max-width:520px;animation:fadeUp .2s ease both;}
@@ -42,8 +39,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .mbtn-cancel:hover{border-color:var(--muted);color:var(--text);}
 .mbtn-ok{background:rgba(74,184,255,.12);border:1px solid rgba(74,184,255,.4);color:var(--accent);}
 .mbtn-ok:hover{background:rgba(74,184,255,.22);border-color:var(--accent);}
-.mbtn-warn{background:rgba(255,184,74,.1);border:1px solid rgba(255,184,74,.35);color:var(--warn);}
-.mbtn-warn:hover{background:rgba(255,184,74,.2);}
 .tpl-list{display:flex;flex-direction:column;gap:4px;max-height:280px;overflow-y:auto;margin-bottom:14px;}
 .tpl-item{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border:1px solid var(--border);border-radius:3px;cursor:pointer;transition:all .15s;}
 .tpl-item:hover{background:var(--active-bg);border-color:rgba(74,184,255,.3);}
@@ -53,7 +48,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .tpl-del:hover{color:var(--accent2);opacity:1;}
 .no-item{font-size:11px;letter-spacing:.18em;color:var(--muted);padding:16px 0;text-align:center;}
 
-/* ── FIREBASE SETUP SCREEN ── */
+/* FIREBASE SETUP */
 #screen-fbsetup{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 50%,rgba(74,184,255,.06) 0%,transparent 65%);}
 .fb-setup-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:32px 32px 28px;width:90%;max-width:560px;}
 .fb-setup-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.15em;color:var(--accent);margin-bottom:6px;}
@@ -76,7 +71,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .fb-status.checking{color:var(--muted);}
 .fb-hint{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:16px;line-height:1.8;border-top:1px solid var(--border);padding-top:14px;}
 
-/* ── HOME ── */
+/* HOME */
 #screen-home{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,rgba(74,184,255,.07) 0%,transparent 65%);}
 .home-inner{text-align:center;animation:fadeUp .6s ease both;}
 .home-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);letter-spacing:.2em;color:var(--accent);margin-bottom:8px;}
@@ -105,7 +100,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .si-del:hover{color:var(--accent2);opacity:1;}
 .no-saved{font-size:15px;letter-spacing:.15em;color:var(--muted);padding:20px 0;}
 
-/* ── WIZARD ── */
+/* WIZARD */
 #screen-wizard{display:none;flex-direction:column;}
 #screen-wizard.active{display:flex;}
 .wz-header{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--border);background:rgba(8,12,16,.97);flex-shrink:0;}
@@ -132,7 +127,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .wz-date-input{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:18px;font-weight:700;padding:10px 14px;outline:none;transition:border-color .2s;letter-spacing:.05em;}
 .wz-date-input:focus{border-color:var(--accent);}
 .wz-date-hint{font-size:11px;letter-spacing:.14em;color:var(--muted);}
-/* event date badge in header */
 .ev-date-badge{font-size:13px;letter-spacing:.1em;color:var(--warn);font-weight:700;background:rgba(255,190,58,.1);border:1px solid rgba(255,190,58,.25);border-radius:3px;padding:3px 10px;white-space:nowrap;}
 .wz-tt-wrap{max-width:700px;margin:0 auto;padding:0 22px;}
 .wz-tt-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
@@ -140,13 +134,20 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .wz-tt-actions{display:flex;gap:7px;}
 .tpl-btn{background:rgba(255,184,74,.07);border:1px solid rgba(255,184,74,.28);color:var(--warn);font-family:'Zen Kaku Gothic New',sans-serif;font-size:9px;letter-spacing:.18em;padding:5px 12px;border-radius:2px;cursor:pointer;transition:all .15s;}
 .tpl-btn:hover{background:rgba(255,184,74,.15);border-color:var(--warn);}
-.tt-col-headers{display:grid;grid-template-columns:24px 26px 28px 94px 1fr 70px;gap:6px;padding:0 8px 6px;font-size:8px;letter-spacing:.2em;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px;}
+
+/* ★ WIZARD TABLE: 6 cols (select-all + drag + lock + time + label + actions) */
+.tt-col-headers{display:grid;grid-template-columns:22px 24px 26px 94px 1fr 70px;gap:6px;padding:0 8px 6px;font-size:8px;letter-spacing:.2em;color:var(--muted);border-bottom:1px solid var(--border);margin-bottom:4px;}
 .tt-list{display:flex;flex-direction:column;gap:2px;margin-bottom:9px;}
-.tt-row{display:grid;grid-template-columns:24px 26px 28px 94px 1fr 70px;align-items:center;gap:6px;padding:7px 8px;border-radius:3px;border:1px solid transparent;transition:border-color .15s;position:relative;}
+.tt-row{display:grid;grid-template-columns:22px 24px 26px 94px 1fr 70px;align-items:center;gap:6px;padding:7px 8px;border-radius:3px;border:1px solid transparent;transition:border-color .15s;position:relative;}
 .tt-row:hover{border-color:rgba(255,255,255,.06);}
 .tt-row.is-locked{border-color:rgba(255,184,74,.18);}
 .tt-row.drag-over{border-color:var(--accent);background:rgba(74,184,255,.06);}
 .tt-row.dragging{opacity:.35;}
+
+/* bulk select checkbox */
+.bulk-sel{display:flex;align-items:center;justify-content:center;}
+.bulk-sel input[type=checkbox]{cursor:pointer;accent-color:var(--accent);width:13px;height:13px;}
+
 .drag-handle{display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:12px;cursor:grab;opacity:.3;transition:opacity .15s;user-select:none;}
 .tt-row:hover .drag-handle{opacity:.65;}
 .lock-toggle{display:flex;align-items:center;justify-content:center;}
@@ -169,44 +170,18 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .ra-btn.del:hover{color:var(--accent2);}
 .btn-add-row{display:flex;align-items:center;gap:6px;background:none;border:1px dashed rgba(74,184,255,.2);color:rgba(74,184,255,.5);font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;letter-spacing:.18em;padding:7px 12px;border-radius:3px;cursor:pointer;transition:all .15s;width:100%;justify-content:center;}
 .btn-add-row:hover{border-color:var(--accent);color:var(--accent);background:var(--active-bg);}
-.wz-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;letter-spacing:.13em;color:var(--muted);}
 
-/* ── BULK SHIFT ── */
-.bulk-shift-bar{
-  display:flex;align-items:center;gap:8px;
-  margin-top:10px;padding:10px 12px;
-  background:rgba(56,200,255,0.05);
-  border:1px solid rgba(56,200,255,0.2);
-  border-radius:4px;
-  flex-wrap:wrap;
-}
-.bulk-shift-label{font-size:11px;letter-spacing:.15em;color:var(--accent);white-space:nowrap;}
-.bulk-shift-input{
-  background:rgba(255,255,255,.06);border:1px solid var(--border);
-  border-radius:3px;color:var(--text);
-  font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;
-  padding:6px 10px;outline:none;width:90px;text-align:center;
-  transition:border-color .2s;
-}
+/* ★ BULK SHIFT BAR */
+.bulk-shift-bar{display:flex;align-items:center;gap:8px;margin-top:8px;padding:9px 12px;background:rgba(56,200,255,.05);border:1px solid rgba(56,200,255,.18);border-radius:4px;flex-wrap:wrap;}
+.bulk-shift-label{font-size:11px;letter-spacing:.14em;color:var(--accent);white-space:nowrap;}
+.bulk-shift-input{background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;padding:5px 10px;outline:none;width:80px;text-align:center;transition:border-color .2s;}
 .bulk-shift-input:focus{border-color:var(--accent);}
-.bulk-shift-unit{font-size:11px;letter-spacing:.1em;color:var(--muted);}
-.bulk-shift-btn{
-  background:rgba(56,200,255,.12);border:1px solid rgba(56,200,255,.4);
-  color:var(--accent);font-family:'Zen Kaku Gothic New',sans-serif;
-  font-size:11px;letter-spacing:.15em;padding:7px 16px;border-radius:3px;
-  cursor:pointer;transition:all .15s;
-}
-.bulk-shift-btn:hover{background:rgba(56,200,255,.22);border-color:var(--accent);}
-.bulk-shift-hint{font-size:9px;letter-spacing:.12em;color:var(--muted);width:100%;}
-.bulk-check{display:flex;align-items:center;justify-content:center;}
-.bulk-cb{display:none;}
-.bulk-lbl{
-  width:18px;height:18px;border:1px solid rgba(255,255,255,.15);
-  border-radius:3px;cursor:pointer;display:flex;align-items:center;
-  justify-content:center;font-size:11px;color:transparent;
-  transition:all .15s;user-select:none;
-}
-.bulk-cb:checked+.bulk-lbl{background:rgba(56,200,255,.15);border-color:var(--accent);color:var(--accent);}
+.bulk-shift-unit{font-size:11px;color:var(--muted);}
+.bulk-shift-btn{background:rgba(56,200,255,.12);border:1px solid rgba(56,200,255,.4);color:var(--accent);font-family:'Zen Kaku Gothic New',sans-serif;font-size:11px;letter-spacing:.14em;padding:6px 14px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.bulk-shift-btn:hover{background:rgba(56,200,255,.22);}
+.bulk-shift-hint{font-size:9px;letter-spacing:.1em;color:var(--muted);width:100%;}
+
+.wz-legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border);font-size:9px;letter-spacing:.13em;color:var(--muted);}
 .wz-legend-item{display:flex;align-items:center;gap:5px;}
 .wz-footer{border-top:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:rgba(8,12,16,.97);}
 .wz-next-btn{background:rgba(74,184,255,.12);border:1px solid rgba(74,184,255,.4);color:var(--accent);font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;letter-spacing:.2em;padding:10px 26px;border-radius:3px;cursor:pointer;transition:all .2s;}
@@ -214,13 +189,16 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .wz-next-btn:disabled{opacity:.3;cursor:not-allowed;}
 .wz-footer-hint{font-size:9px;letter-spacing:.16em;color:var(--muted);}
 
-/* ── LIVE ── */
+/* LIVE */
 #screen-live{display:none;flex-direction:column;height:100vh;}
 #screen-live.active{display:flex;}
 .live-header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:2px solid var(--border);background:rgba(10,14,20,.99);flex-shrink:0;gap:8px;}
 .lh-left{display:flex;align-items:center;gap:12px;min-width:0;}
 .lh-title{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:.18em;color:var(--accent);flex-shrink:0;}
 .lh-evname{font-size:15px;letter-spacing:.1em;color:#c8e0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700;}
+.lh-evname-input{font-size:15px;letter-spacing:.1em;color:#c8e0f0;font-weight:700;font-family:'Zen Kaku Gothic New',sans-serif;background:none;border:none;border-bottom:1px solid rgba(56,200,255,.4);outline:none;min-width:80px;max-width:220px;padding:2px 4px;}
+.lh-evname-edit-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px;padding:2px 4px;opacity:.5;transition:all .15s;flex-shrink:0;}
+.lh-evname-edit-btn:hover{opacity:1;color:var(--accent);}
 .sync-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex-shrink:0;}
 .sync-dot.live{background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse-dot 2s infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.5}}
@@ -247,34 +225,33 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-row{display:grid;grid-template-columns:22px 100px 1fr 62px;align-items:center;gap:8px;padding:11px 12px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
+.live-tt-row{display:grid;grid-template-columns:28px 100px 1fr 62px;align-items:center;gap:8px;padding:11px 12px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
 .live-tt-row.is-done{opacity:.28;}
 .live-tt-row.is-next{border-color:rgba(74,184,255,.18);}
-.live-tt-row.is-locked-row{border-color:rgba(255,184,74,.15);}
+.live-tt-row.is-locked-row{border-color:rgba(255,184,74,.3);}
 .live-tt-row.is-locked-row.is-active{border-color:var(--accent);}
-.lt-lock{font-size:14px;color:var(--warn);opacity:.9;text-align:center;}
-.lt-lock-static{font-size:14px;text-align:center;color:var(--warn);}
-.lt-lock-btn{
-  font-size:15px;text-align:center;cursor:pointer;
-  opacity:.35;transition:all .2s;
-  border-radius:3px;padding:2px;
-  user-select:none;
-}
-.lt-lock-btn:hover{opacity:1;transform:scale(1.15);}
-.lt-lock-btn.locked{opacity:.9;color:var(--warn);}
-.lt-time{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:var(--accent);}
-.live-tt-row.is-locked-row .lt-time{color:var(--warn);}
+
+/* ★ LIVE LOCK BUTTON */
+.live-lock-btn{font-size:16px;text-align:center;cursor:pointer;opacity:.25;transition:all .18s;border-radius:3px;padding:2px;user-select:none;line-height:1;}
+.live-lock-btn:hover{opacity:.9;transform:scale(1.1);}
+.live-lock-btn.is-locked{opacity:1;color:var(--warn);}
+
+.lt-time{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--muted);text-decoration:line-through;opacity:.6;}
+.live-tt-row.is-locked-row .lt-time{color:var(--muted);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
-.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--warn);opacity:.9;}
+.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--warn);opacity:1;font-weight:900;}
+/* when no delay, show original time big */
+.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:var(--accent);}
+.live-tt-row.is-locked-row .lt-time-only{color:var(--warn);}
+.live-tt-row.is-done .lt-time-only{color:var(--muted);}
 .lt-label{font-size:16px;letter-spacing:.02em;font-weight:700;}
 .live-tt-row.is-done .lt-label{color:var(--muted);}
 .lt-badge{font-size:11px;letter-spacing:.1em;padding:3px 8px;border-radius:3px;text-align:center;font-weight:700;}
 .lt-badge.active{background:rgba(74,184,255,.15);color:var(--accent);}
 .lt-badge.done{background:rgba(255,255,255,.04);color:var(--muted);}
 .lt-badge.next{background:rgba(74,184,255,.07);color:rgba(74,184,255,.5);}
-.lt-badge.locked{background:rgba(255,184,74,.1);color:var(--warn);font-size:9px;}
 .live-cd{padding:16px 15px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
 .live-cd-title{font-size:13px;letter-spacing:.22em;color:var(--accent);font-weight:700;}
 .delay-status{display:none;align-items:center;gap:6px;background:rgba(255,184,74,.07);border:1px solid rgba(255,184,74,.2);border-radius:3px;padding:7px 10px;}
@@ -295,7 +272,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .cd-ni-start{font-size:12px;letter-spacing:.08em;color:#8ab0cc;}
 .cd-ni-cd{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);white-space:nowrap;margin-left:10px;}
 
-/* ── VIEWER (read-only) ── */
+/* VIEWER */
 #screen-viewer{display:none;flex-direction:column;height:100vh;}
 #screen-viewer.active{display:flex;}
 .viewer-header{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;border-bottom:1px solid var(--border);background:rgba(8,12,16,.97);}
@@ -303,12 +280,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .viewer-evname{font-size:11px;letter-spacing:.18em;color:var(--muted);}
 .viewer-badge{font-size:13px;letter-spacing:.15em;background:rgba(58,255,170,.12);border:1px solid rgba(58,255,170,.4);color:var(--green);padding:5px 14px;border-radius:3px;font-weight:700;}
 
-/* ── SHARE MODAL ── */
-.share-modal-inner{text-align:center;}
-.share-url-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:3px;padding:12px 14px;font-family:monospace;font-size:11px;color:var(--accent);word-break:break-all;margin-bottom:14px;text-align:left;margin-top:4px;}
-#share-qr{display:flex;justify-content:center;margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid var(--border);}
-#share-qr canvas,#share-qr img{border-radius:4px;}
-.copy-btn{background:rgba(74,255,160,.08);border:1px solid rgba(74,255,160,.28);color:var(--green);font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;letter-spacing:.2em;padding:8px 20px;border-radius:3px;cursor:pointer;transition:all .15s;margin-right:8px;}
+/* ★ SHARE MODAL: QR/URL tabs */
+.share-tabs{display:flex;gap:0;margin-bottom:18px;border:1px solid var(--border);border-radius:4px;overflow:hidden;}
+.share-tab-btn{flex:1;background:none;border:none;color:var(--muted);font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.18em;padding:9px;cursor:pointer;transition:all .15s;}
+.share-tab-btn.active{background:rgba(56,200,255,.15);color:var(--accent);}
+#share-panel-qr{text-align:center;}
+#share-panel-url{display:none;}
+.share-url-box{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:3px;padding:10px 14px;font-family:monospace;font-size:11px;color:var(--accent);word-break:break-all;margin-bottom:12px;text-align:left;}
+.copy-btn{background:rgba(74,255,160,.08);border:1px solid rgba(74,255,160,.28);color:var(--green);font-family:'Zen Kaku Gothic New',sans-serif;font-size:10px;letter-spacing:.2em;padding:8px 20px;border-radius:3px;cursor:pointer;transition:all .15s;width:100%;}
 .copy-btn:hover{background:rgba(74,255,160,.16);}
 .share-hint{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:12px;line-height:1.8;}
 
@@ -316,52 +295,25 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(74,184,255,.16);border-radius:99px;}
 
-/* ── MOBILE RESPONSIVE ── */
+/* MOBILE */
 @media(max-width:768px){
-  /* Viewer & Live: stack vertically */
-  .live-main,
-  #screen-viewer .live-main{
-    grid-template-columns:1fr !important;
-    grid-template-rows:65vh 35vh;
-    overflow:hidden;
-  }
-  .live-tt{
-    border-right:none !important;
-    border-bottom:2px solid var(--border);
-    padding:10px 14px !important;
-    overflow-y:auto;
-    height:65vh;
-  }
-  .live-cd{
-    padding:8px 12px !important;
-    overflow-y:auto;
-    height:35vh;
-    gap:5px !important;
-  }
-  /* Shrink live header on mobile */
-  .live-header{
-    flex-wrap:wrap;
-    padding:8px 12px !important;
-    gap:6px !important;
-  }
+  .live-main,#screen-viewer .live-main{grid-template-columns:1fr !important;grid-template-rows:65vh 35vh;overflow:hidden;}
+  .live-tt{border-right:none !important;border-bottom:2px solid var(--border);padding:10px 14px !important;overflow-y:auto;height:65vh;}
+  .live-cd{padding:8px 12px !important;overflow-y:auto;height:35vh;gap:5px !important;}
+  .live-header{flex-wrap:wrap;padding:8px 12px !important;gap:6px !important;}
   .lh-left{flex:1 1 100%;}
   .delay-bar{flex:1 1 auto;justify-content:center;}
   .lc-wrap{display:none;}
   .lh-btns{flex:1 1 auto;justify-content:flex-end;}
-  /* Bigger tap targets */
   .dbtn{width:36px !important;height:36px !important;font-size:16px !important;}
   .d-apply{font-size:14px !important;padding:8px 14px !important;}
   .lh-btn{font-size:12px !important;padding:7px 14px !important;}
-  /* Countdown compact on mobile */
   .cd-big{font-size:52px !important;}
   .cd-cur{padding:12px !important;}
-  /* Viewer header */
   .viewer-header{flex-wrap:wrap;padding:8px 12px;gap:6px;}
-  /* Live TT rows bigger touch targets */
   .live-tt-row{padding:10px 10px !important;margin-bottom:4px !important;}
   .lt-label{font-size:15px !important;}
   .lt-time{font-size:20px !important;}
-  /* Hide next-wrap on mobile to save space */
   #vcd-next-wrap .cd-next-title{font-size:11px !important;}
   #vcd-next-wrap .cd-ni{padding:6px 8px !important;}
   #vcd-next-wrap .cd-ni-label{font-size:12px !important;}
@@ -374,38 +326,31 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-tpl-load"><div class="modal"><div class="modal-title">テンプレートから読み込み</div><div class="tpl-list" id="tpl-load-list"></div><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-load')">キャンセル</button></div></div></div>
 <div class="modal-overlay" id="modal-tpl-save"><div class="modal"><div class="modal-title">テンプレートとして保存</div><input class="modal-input" id="tpl-save-name" placeholder="テンプレート名（例：式典進行）" onkeydown="if(event.key==='Enter')doSaveTpl()"><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-save')">キャンセル</button><button class="mbtn mbtn-ok" onclick="doSaveTpl()">保存</button></div></div></div>
+
+<!-- ★ SHARE MODAL with QR/URL tabs -->
 <div class="modal-overlay" id="modal-share">
-  <div class="modal" style="max-width:480px;">
+  <div class="modal" style="max-width:440px;">
     <div class="modal-title">スタッフへ共有</div>
-    <!-- Tab switcher -->
-    <div style="display:flex;gap:0;margin-bottom:20px;border:1px solid var(--border);border-radius:4px;overflow:hidden;">
-      <button id="share-tab-qr" onclick="switchShareTab('qr')"
-        style="flex:1;background:rgba(56,200,255,.15);border:none;color:var(--accent);font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.2em;padding:9px;cursor:pointer;transition:all .15s;">
-        📷 QRコード
-      </button>
-      <button id="share-tab-url" onclick="switchShareTab('url')"
-        style="flex:1;background:none;border:none;color:var(--muted);font-family:'Zen Kaku Gothic New',sans-serif;font-size:12px;letter-spacing:.2em;padding:9px;cursor:pointer;transition:all .15s;">
-        🔗 URL
-      </button>
+    <div class="share-tabs">
+      <button class="share-tab-btn active" id="tab-qr" onclick="switchShareTab('qr')">📷 QRコード</button>
+      <button class="share-tab-btn" id="tab-url" onclick="switchShareTab('url')">🔗 URL</button>
     </div>
-    <!-- QR panel -->
     <div id="share-panel-qr">
-      <div id="share-qr" style="display:flex;justify-content:center;margin-bottom:16px;"></div>
-      <div style="text-align:center;font-size:10px;letter-spacing:.15em;color:var(--muted);">カメラでスキャンしてください</div>
+      <div id="share-qr" style="display:flex;justify-content:center;margin-bottom:10px;"></div>
+      <div style="font-size:10px;letter-spacing:.15em;color:var(--muted);text-align:center;margin-bottom:14px;">カメラでスキャン</div>
     </div>
-    <!-- URL panel -->
-    <div id="share-panel-url" style="display:none;">
+    <div id="share-panel-url">
       <div class="share-url-box" id="share-url-text"></div>
-      <button class="copy-btn" onclick="copyShareUrl()" style="width:100%;margin-bottom:8px;">URLをコピー</button>
+      <button class="copy-btn" onclick="copyShareUrl()">URLをコピー</button>
     </div>
-    <div style="margin-top:14px;display:flex;justify-content:flex-end;">
+    <div style="display:flex;justify-content:flex-end;margin-top:14px;">
       <button class="mbtn mbtn-cancel" onclick="closeModal('modal-share')">閉じる</button>
     </div>
-    <div class="share-hint" style="margin-top:10px;">スタッフはClaudeアカウント不要で閲覧できます。</div>
+    <div class="share-hint">スタッフはClaudeアカウント不要で閲覧できます。</div>
   </div>
 </div>
 
-<!-- ══ FIREBASE SETUP ══ -->
+<!-- FIREBASE SETUP -->
 <div id="screen-fbsetup" class="screen">
   <div class="fb-setup-card">
     <div class="fb-setup-title">FIREBASE 接続設定</div>
@@ -421,11 +366,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
       <button class="fb-save-btn" onclick="saveFbConfig()">保存して開始</button>
       <button class="fb-skip" onclick="skipFb()">Firebase なしで使う →</button>
     </div>
-    <div class="fb-hint">設定値は <a href="firebase_setup_guide.html" target="_blank" style="color:var(--accent)">セットアップガイド</a> を参照してください。設定はブラウザに保存されます。</div>
+    <div class="fb-hint">設定はブラウザに保存されます。</div>
   </div>
 </div>
 
-<!-- ══ HOME ══ -->
+<!-- HOME -->
 <div id="screen-home" class="screen">
   <div class="home-inner">
     <div class="home-logo">EVENT TIMER</div>
@@ -441,7 +386,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
-<!-- ══ WIZARD ══ -->
+<!-- WIZARD -->
 <div id="screen-wizard" class="screen">
   <div class="wz-header">
     <div class="wz-title">イベント作成</div>
@@ -477,26 +422,25 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
           </div>
         </div>
         <div class="tt-col-headers">
-  <div style="display:flex;align-items:center;justify-content:center;">
-    <input type="checkbox" id="bulk-select-all" title="全て選択" style="cursor:pointer;accent-color:var(--accent);width:14px;height:14px;" onchange="toggleSelectAll(this.checked)">
-  </div>
-  <div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div>
-</div>
+          <div><input type="checkbox" id="sel-all" title="全て選択" style="cursor:pointer;accent-color:var(--accent);width:13px;height:13px;" onchange="toggleSelAll(this.checked)"></div>
+          <div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div>
+        </div>
         <div class="tt-list" id="wz-tt-list"></div>
         <button class="btn-add-row" onclick="addWzRow()">＋ 末尾にパートを追加</button>
-        <div class="bulk-shift-bar" id="bulk-shift-bar">
-          <div class="bulk-shift-label">選択行を一括シフト</div>
-          <input class="bulk-shift-input" type="number" id="bulk-shift-val" value="0" placeholder="0">
-          <div class="bulk-shift-unit">分</div>
+        <!-- ★ BULK SHIFT BAR -->
+        <div class="bulk-shift-bar">
+          <span class="bulk-shift-label">選択行を一括シフト</span>
+          <input class="bulk-shift-input" type="number" id="bulk-val" value="0" placeholder="分">
+          <span class="bulk-shift-unit">分</span>
           <button class="bulk-shift-btn" onclick="applyBulkShift()">適用</button>
-          <div class="bulk-shift-hint">チェックした行の時刻をまとめてずらします（例：-60 で1時間前倒し）</div>
+          <span class="bulk-shift-hint">チェックした行の時刻をまとめてずらします（例：−60 で1時間前倒し）</span>
         </div>
         <div class="wz-legend">
           <div class="wz-legend-item"><span style="opacity:.5">⠿</span>&nbsp;ドラッグで並び替え</div>
           <div class="wz-legend-item"><span style="color:var(--accent);font-size:11px">▲▼</span>&nbsp;上下移動</div>
           <div class="wz-legend-item"><span style="color:var(--green);font-size:11px">＋</span>&nbsp;直下に挿入</div>
           <div class="wz-legend-item"><span style="color:var(--warn)">🔒</span>&nbsp;時刻固定</div>
-          <div class="wz-legend-item"><span style="color:var(--accent);font-size:11px">✓</span>&nbsp;複数選択して一括シフト</div>
+          <div class="wz-legend-item"><span style="color:var(--accent)">✓</span>&nbsp;選択→一括シフト</div>
         </div>
       </div>
     </div>
@@ -513,12 +457,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
-<!-- ══ LIVE ══ -->
+<!-- LIVE -->
 <div id="screen-live" class="screen">
   <div class="live-header">
     <div class="lh-left">
       <div class="lh-title">EVENT TIMER</div>
-      <div class="lh-evname" id="lh-evname"></div>
+      <div class="lh-evname" id="lh-evname" onclick="startEditEvName()" title="クリックで編集" style="cursor:pointer;"></div>
+      <button class="lh-evname-edit-btn" onclick="startEditEvName()" title="イベント名を編集">✎</button>
       <div class="ev-date-badge" id="lh-evdate" style="display:none"></div>
       <div class="sync-dot" id="sync-dot" title="Firebase同期状態"></div>
     </div>
@@ -559,7 +504,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
-<!-- ══ VIEWER (read-only) ══ -->
+<!-- VIEWER -->
 <div id="screen-viewer" class="screen">
   <div class="viewer-header">
     <div style="display:flex;align-items:center;gap:12px">
@@ -599,7 +544,7 @@ function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace
 function toMins(t){if(!t)return null;const[h,m]=t.split(':').map(Number);return isNaN(h)||isNaN(m)?null:h*60+m;}
 function minsToStr(m){return`${pad(Math.floor(m/60)%24)}:${pad(m%60)}`;}
 
-/* ── STORAGE ── */
+/* STORAGE */
 const EV_KEY='eventTimerEvents_v1';
 const TPL_KEY='eventTimerTemplates_v1';
 const FB_KEY='eventTimerFirebaseConfig_v1';
@@ -614,27 +559,16 @@ function deleteTemplate(id){saveTemplates(loadTemplates().filter(t=>t.id!==id));
 function loadFbConfig(){try{return JSON.parse(localStorage.getItem(FB_KEY))||null;}catch{return null;}}
 function saveFbConfig_store(cfg){localStorage.setItem(FB_KEY,JSON.stringify(cfg));}
 
-/* ── FIREBASE ── */
-let fbDb=null;
-let fbConnected=false;
-let currentSessionId=null; // Firebase path key for current event
-
+/* FIREBASE */
+let fbDb=null,fbConnected=false,currentSessionId=null;
 function initFirebase(cfg){
   try{
-    // avoid re-init
     if(firebase.apps.length){firebase.app().delete().catch(()=>{});}
     firebase.initializeApp(cfg);
     fbDb=firebase.database();
-    fbConnected=true;
-    updateFbIndicators();
-    return true;
-  }catch(e){
-    fbConnected=false;
-    updateFbIndicators();
-    return false;
-  }
+    fbConnected=true;updateFbIndicators();return true;
+  }catch(e){fbConnected=false;updateFbIndicators();return false;}
 }
-
 function updateFbIndicators(){
   const dot=document.getElementById('home-fb-dot');
   const lbl=document.getElementById('home-fb-label');
@@ -643,16 +577,12 @@ function updateFbIndicators(){
   if(lbl){lbl.textContent=fbConnected?'Firebase接続中':'Firebase未接続';}
   if(sdot){sdot.className='sync-dot'+(fbConnected?' live':'');}
 }
-
-/* Firebase: publish live state */
 function fbPublish(data){
   if(!fbDb||!currentSessionId)return;
   fbDb.ref(`sessions/${currentSessionId}`).set({...data,ts:Date.now()}).catch(e=>console.warn('FB write:',e));
 }
-
-/* Firebase: subscribe (viewer) */
 let fbUnsubscribe=null;
-function fbSubscribe(sessionId, cb){
+function fbSubscribe(sessionId,cb){
   if(!fbDb)return;
   const ref=fbDb.ref(`sessions/${sessionId}`);
   ref.on('value',snap=>{const d=snap.val();if(d)cb(d);});
@@ -660,31 +590,17 @@ function fbSubscribe(sessionId, cb){
 }
 function fbUnsubAll(){if(fbUnsubscribe){fbUnsubscribe();fbUnsubscribe=null;}}
 
-/* ── FIREBASE SETUP UI ── */
-function getFbFields(){
-  return{
-    apiKey:document.getElementById('fb-apiKey').value.trim(),
-    authDomain:document.getElementById('fb-authDomain').value.trim(),
-    databaseURL:document.getElementById('fb-databaseURL').value.trim(),
-    projectId:document.getElementById('fb-projectId').value.trim(),
-    appId:document.getElementById('fb-appId').value.trim(),
-  };
-}
+/* FIREBASE SETUP UI */
+function getFbFields(){return{apiKey:document.getElementById('fb-apiKey').value.trim(),authDomain:document.getElementById('fb-authDomain').value.trim(),databaseURL:document.getElementById('fb-databaseURL').value.trim(),projectId:document.getElementById('fb-projectId').value.trim(),appId:document.getElementById('fb-appId').value.trim()};}
 function setFbStatus(msg,cls){const el=document.getElementById('fb-status');el.textContent=msg;el.className='fb-status '+cls;}
-
 async function testFbConnection(){
   const cfg=getFbFields();
   if(!cfg.apiKey||!cfg.databaseURL){setFbStatus('必須項目を入力してください','err');return;}
   setFbStatus('接続確認中...','checking');
   const ok=initFirebase(cfg);
-  if(ok){
-    try{
-      await fbDb.ref('.info/connected').once('value');
-      setFbStatus('✓ 接続成功！','ok');
-    }catch(e){setFbStatus('接続失敗：'+e.message,'err');}
-  }else{setFbStatus('初期化失敗。設定値を確認してください','err');}
+  if(ok){try{await fbDb.ref('.info/connected').once('value');setFbStatus('✓ 接続成功！','ok');}catch(e){setFbStatus('接続失敗：'+e.message,'err');}}
+  else{setFbStatus('初期化失敗。設定値を確認してください','err');}
 }
-
 function saveFbConfig(){
   const cfg=getFbFields();
   if(!cfg.apiKey||!cfg.databaseURL){setFbStatus('必須項目を入力してください','err');return;}
@@ -694,52 +610,41 @@ function saveFbConfig(){
 }
 function skipFb(){renderHome();}
 
-/* ── MODAL ── */
+/* MODAL */
 function openModal(id){document.getElementById(id).classList.add('open');}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 document.querySelectorAll('.modal-overlay').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');});});
 
-/* ── SHARE ── */
+/* ★ SHARE with tab switch */
+function switchShareTab(tab){
+  const isQr=tab==='qr';
+  document.getElementById('share-panel-qr').style.display=isQr?'block':'none';
+  document.getElementById('share-panel-url').style.display=isQr?'none':'block';
+  document.getElementById('tab-qr').className='share-tab-btn'+(isQr?' active':'');
+  document.getElementById('tab-url').className='share-tab-btn'+(!isQr?' active':'');
+}
 function openShareModal(){
-  if(!fbConnected||!currentSessionId){
-    alert('Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。');
-    return;
-  }
-  // Embed Firebase config in URL so viewers don't need to configure
+  if(!fbConnected||!currentSessionId){alert('Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。');return;}
   const cfg=loadFbConfig()||{};
-  const params=new URLSearchParams({
-    view:currentSessionId,
-    ak:cfg.apiKey||'',
-    au:cfg.authDomain||'',
-    du:cfg.databaseURL||'',
-    pi:cfg.projectId||'',
-    ai:cfg.appId||''
-  });
+  const params=new URLSearchParams({view:currentSessionId,ak:cfg.apiKey||'',au:cfg.authDomain||'',du:cfg.databaseURL||'',pi:cfg.projectId||'',ai:cfg.appId||''});
   const url=`${location.href.split('?')[0]}?${params.toString()}`;
   document.getElementById('share-url-text').textContent=url;
   const qrDiv=document.getElementById('share-qr');
   qrDiv.innerHTML='';
-  new QRCode(qrDiv,{text:url,width:260,height:260,colorDark:'#ffffff',colorLight:'#0d1318'});
+  new QRCode(qrDiv,{text:url,width:240,height:240,colorDark:'#ffffff',colorLight:'#0d1318'});
+  switchShareTab('qr');
   openModal('modal-share');
 }
 function copyShareUrl(){
   const url=document.getElementById('share-url-text').textContent;
   navigator.clipboard.writeText(url).then(()=>{
-    const btn=document.querySelector('#share-panel-url .copy-btn');
-    if(btn){btn.textContent='✓ コピーしました';setTimeout(()=>btn.textContent='URLをコピー',2000);}
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✓ コピーしました';
+    setTimeout(()=>btn.textContent='URLをコピー',2000);
   });
 }
-function switchShareTab(tab){
-  const isQr=tab==='qr';
-  document.getElementById('share-panel-qr').style.display=isQr?'block':'none';
-  document.getElementById('share-panel-url').style.display=isQr?'none':'block';
-  document.getElementById('share-tab-qr').style.background=isQr?'rgba(56,200,255,.15)':'none';
-  document.getElementById('share-tab-qr').style.color=isQr?'var(--accent)':'var(--muted)';
-  document.getElementById('share-tab-url').style.background=isQr?'none':'rgba(56,200,255,.15)';
-  document.getElementById('share-tab-url').style.color=isQr?'var(--muted)':'var(--accent)';
-}
 
-/* ── TEMPLATE ── */
+/* TEMPLATE */
 let tplLoadTarget=null;
 function openTplLoad(){tplLoadTarget='wizard';renderTplList();openModal('modal-tpl-load');}
 function openTplLoadFromHome(){tplLoadTarget='home';renderTplList();openModal('modal-tpl-load');}
@@ -758,7 +663,7 @@ function doSaveTpl(){
   const name=document.getElementById('tpl-save-name').value.trim();if(!name)return;
   const sorted=[...wzRows].sort((a,b)=>a.baseTime-b.baseTime);
   const base=sorted.length?sorted[0].baseTime:0;
-  const tpl={id:'tpl_'+Date.now(),name,rows:wzRows.map(r=>({offsetMins:r.baseTime-base,label:r.label,locked:r.locked})),createdAt:Date.now()};
+  const tpl={id:'tpl_'+Date.now(),name,rows:wzRows.map(r=>({offsetMins:r.baseTime-base,label:r.label,locked:r.locked===true})),createdAt:Date.now()};
   const tpls=loadTemplates();tpls.unshift(tpl);saveTemplates(tpls);
   closeModal('modal-tpl-save');
 }
@@ -770,39 +675,16 @@ function applyTemplate(id){
 }
 function applyTplRows(tpl){
   const base=wzRows.length?Math.min(...wzRows.map(r=>r.baseTime)):9*60;
-  wzNid=1;wzRows=tpl.rows.map(r=>({id:wzNid++,baseTime:base+r.offsetMins,label:r.label,locked:r.locked}));
+  wzNid=1;wzRows=tpl.rows.map(r=>({id:wzNid++,baseTime:base+r.offsetMins,label:r.label,locked:r.locked===true}));
   renderWzTable();
 }
 
-/* ── HOME ── */
+/* HOME */
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
-function toggleSelectAll(checked){
-  document.querySelectorAll('.bulk-cb').forEach(cb=>{ cb.checked=checked; });
-}
-
-function applyBulkShift(){
-  const mins=parseInt(document.getElementById('bulk-shift-val').value)||0;
-  if(mins===0){alert('シフトする分数を入力してください');return;}
-  const checked=document.querySelectorAll('.bulk-cb:checked');
-  if(checked.length===0){alert('シフトする行にチェックを入れてください');return;}
-  checked.forEach(cb=>{
-    const rowId=parseInt(cb.id.replace('wbulk-',''));
-    const r=wzRows.find(r=>r.id===rowId);
-    if(r){
-      r.baseTime=Math.max(0,r.baseTime+mins);
-    }
-  });
-  renderWzTable();
-  document.getElementById('bulk-shift-val').value=0;
-}
-
 function formatDate(dateStr){
   if(!dateStr)return'';
-  try{
-    const d=new Date(dateStr+'T00:00:00');
-    const dj=['日','月','火','水','木','金','土'];
-    return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;
-  }catch{return dateStr;}
+  try{const d=new Date(dateStr+'T00:00:00');const dj=['日','月','火','水','木','金','土'];return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;}
+  catch{return dateStr;}
 }
 function renderHome(){
   updateFbIndicators();
@@ -826,7 +708,7 @@ function openEvent(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loa
 function editFromHome(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
 function goHome(){pendingDelay=0;appliedDelay=0;stopLiveTick();fbUnsubAll();renderHome();}
 
-/* ── WIZARD ── */
+/* WIZARD */
 let currentEventId=null,pendingDelay=0,appliedDelay=0;
 let wzRows=[],wzNid=1,currentWzStep=1;
 
@@ -836,7 +718,11 @@ function startWizard(editId){
   else{wzRows=[];wzNid=1;document.getElementById('wz-evname').value='';document.getElementById('wz-evdate').value='';addWzRow();}
   currentWzStep=1;setWzStep(1);showScreen('screen-wizard');
 }
-function loadWzFromEvent(ev){document.getElementById('wz-evname').value=ev.name||'';document.getElementById('wz-evdate').value=ev.date||'';wzNid=1;wzRows=ev.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));wzNid=wzRows.length+1;}
+function loadWzFromEvent(ev){
+  document.getElementById('wz-evname').value=ev.name||'';
+  document.getElementById('wz-evdate').value=ev.date||'';
+  wzNid=1;wzRows=ev.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));wzNid=wzRows.length+1;
+}
 function goEdit(){stopLiveTick();const ev=getEvent(currentEventId);if(ev)loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
 function onEvNameInput(){document.getElementById('wz-next-btn').disabled=!document.getElementById('wz-evname').value.trim();}
 
@@ -850,7 +736,6 @@ function setWzStep(n){
   const nb=document.getElementById('wz-next-btn'),fh=document.getElementById('wz-footer-hint');
   if(n===1){
     nb.disabled=!document.getElementById('wz-evname').value.trim();nb.textContent='次へ →';fh.textContent='イベント名と開催日を入力してください';
-    // set today as default if empty
     const dateEl=document.getElementById('wz-evdate');
     if(!dateEl.value){const t=new Date();dateEl.value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;}
   }
@@ -881,6 +766,22 @@ function updateWzLabel(id,v){const r=wzRows.find(r=>r.id===id);if(r)r.label=v;}
 function toggleWzLocked(id){const r=wzRows.find(r=>r.id===id);if(r){r.locked=!r.locked;renderWzTable();}}
 function moveRow(id,dir){const idx=wzRows.findIndex(r=>r.id===id);if(idx<0)return;const ni=idx+dir;if(ni<0||ni>=wzRows.length)return;[wzRows[idx],wzRows[ni]]=[wzRows[ni],wzRows[idx]];renderWzTable();}
 
+/* ★ BULK SHIFT */
+function toggleSelAll(checked){document.querySelectorAll('.row-sel-cb').forEach(cb=>cb.checked=checked);}
+function applyBulkShift(){
+  const mins=parseInt(document.getElementById('bulk-val').value)||0;
+  if(mins===0){alert('シフトする分数を入力してください（例：−60）');return;}
+  const checked=document.querySelectorAll('.row-sel-cb:checked');
+  if(!checked.length){alert('シフトする行にチェックを入れてください');return;}
+  checked.forEach(cb=>{
+    const id=parseInt(cb.dataset.id);
+    const r=wzRows.find(r=>r.id===id);
+    if(r)r.baseTime=Math.max(0,r.baseTime+mins);
+  });
+  renderWzTable();
+  document.getElementById('bulk-val').value=0;
+}
+
 let dragSrcId=null;
 function onDragStart(e,id){dragSrcId=id;setTimeout(()=>{const el=document.querySelector(`.tt-row[data-id="${id}"]`);if(el)el.classList.add('dragging');},0);}
 function onDragEnd(){document.querySelectorAll('.tt-row').forEach(el=>el.classList.remove('dragging','drag-over'));dragSrcId=null;}
@@ -890,11 +791,10 @@ function onDrop(e,id){e.preventDefault();if(dragSrcId==null||dragSrcId===id)retu
 function renderWzTable(){
   document.getElementById('wz-tt-list').innerHTML=wzRows.map((r,i)=>{
     const cbId=`wlck-${r.id}`;
-    const bcbId=`wbulk-${r.id}`;
     return`<div class="tt-row${r.locked?' is-locked':''}" data-id="${r.id}" draggable="true" ondragstart="onDragStart(event,${r.id})" ondragend="onDragEnd()" ondragover="onDragOver(event,${r.id})" ondrop="onDrop(event,${r.id})">
-      <div class="bulk-check"><input type="checkbox" class="bulk-cb" id="${bcbId}"><label class="bulk-lbl" for="${bcbId}" title="一括シフト対象に選択">✓</label></div>
-      <div class="drag-handle" title="ドラッグで並び替え">⠿</div>
-      <div class="lock-toggle"><input type="checkbox" class="lock-cb" id="${cbId}" ${r.locked?'checked':''} onchange="toggleWzLocked(${r.id})"><label class="lock-lbl" for="${cbId}" title="${r.locked?'🔒 固定中（クリックで解除）':'クリックで時刻を固定'}">🔒</label></div>
+      <div class="bulk-sel"><input type="checkbox" class="row-sel-cb" data-id="${r.id}"></div>
+      <div class="drag-handle">⠿</div>
+      <div class="lock-toggle"><input type="checkbox" class="lock-cb" id="${cbId}" ${r.locked?'checked':''} onchange="toggleWzLocked(${r.id})"><label class="lock-lbl" for="${cbId}" title="${r.locked?'固定中（クリックで解除）':'クリックで時刻固定'}">🔒</label></div>
       <input class="tt-time" type="time" value="${minsToStr(r.baseTime)}" onchange="updateWzTime(${r.id},this.value)">
       <input class="tt-label" type="text" value="${esc(r.label)}" placeholder="パート名..." oninput="updateWzLabel(${r.id},this.value)">
       <div class="row-actions">
@@ -923,10 +823,11 @@ function renderWzConfirm(){
     ${fbConnected?'<div style="font-size:10px;letter-spacing:.14em;color:var(--green);margin-top:14px">✓ Firebase接続中 — リアルタイム共有が有効です</div>':'<div style="font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:14px">Firebase未接続 — ローカルのみで動作します</div>'}`;
 }
 
-/* ── SAVE & LIVE ── */
+/* SAVE & LIVE */
 function saveAndStartLive(){
   const name=document.getElementById('wz-evname').value.trim()||'（無題）';
-  const date=document.getElementById('wz-evdate').value||'';const ev={id:currentEventId,name,date,rows:wzRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked})),updatedAt:Date.now()};
+  const date=document.getElementById('wz-evdate').value||'';
+  const ev={id:currentEventId,name,date,rows:wzRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked===true})),updatedAt:Date.now()};
   upsertEvent(ev);startLive(ev);
 }
 
@@ -934,20 +835,32 @@ let liveTick=null,liveRows=[];
 function startLive(ev){
   const event=ev||getEvent(currentEventId);if(!event)return;
   liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
-  currentSessionId=event.id; // use event id as Firebase session key
+  currentSessionId=event.id;
   pendingDelay=0;appliedDelay=0;
   document.getElementById('delay-val').textContent='+0分';
   document.getElementById('delay-status').classList.remove('on');
   document.getElementById('lh-evname').textContent=event.name?`/ ${event.name}`:'';
+  const dateBadge=document.getElementById('lh-evdate');
+  if(event.date){dateBadge.textContent='📅 '+formatDate(event.date);dateBadge.style.display='';}
+  else dateBadge.style.display='none';
   updateFbIndicators();
   showScreen('screen-live');stopLiveTick();
-  liveRender();
-  // publish initial state
-  publishLiveState();
+  liveRender();publishLiveState();
   liveTick=setInterval(()=>{tickLiveClock();liveRender();},1000);
   tickLiveClock();
 }
 function stopLiveTick(){if(liveTick){clearInterval(liveTick);liveTick=null;}}
+
+/* ★ LIVE LOCK TOGGLE */
+function toggleLiveLock(id){
+  const r=liveRows.find(r=>r.id===id);if(!r)return;
+  r.locked=!r.locked;
+  // save back
+  const ev=getEvent(currentEventId);
+  if(ev){ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));upsertEvent(ev);}
+  publishLiveState();
+  liveRender();
+}
 
 function publishLiveState(){
   if(!fbConnected||!currentSessionId)return;
@@ -961,30 +874,14 @@ function publishLiveState(){
 }
 
 function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
-
-function toggleLiveLock(id){
-  const r=liveRows.find(r=>r.id===id);
-  if(!r)return;
-  r.locked=!r.locked;
-  // save back to storage
-  const ev=getEvent(currentEventId);
-  if(ev){
-    ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));
-    upsertEvent(ev);
-  }
-  publishLiveState();
-  liveRender();
-}
 function getEffStr(r){return minsToStr(getEff(r));}
-
 function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
 function applyDelay(){
   appliedDelay=pendingDelay;
   const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
   if(appliedDelay===0)ds.classList.remove('on');
   else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
-  liveRender();
-  publishLiveState(); // ← Firebaseに書き込む
+  liveRender();publishLiveState();
 }
 function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
 
@@ -996,109 +893,111 @@ function tickLiveClock(){
   document.getElementById('lh-date').textContent=`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${DJ[n.getDay()]})`;
 }
 
-function liveRender(){
-  const ev=getEvent(currentEventId)||{};
-  renderCountdown(liveRows,appliedDelay,ev.date||'','live-tt-list','cd-label','cd-h','cd-m','cd-s','cd-sub','cd-prog','cd-next-wrap');
+function startEditEvName(){
+  const evnameEl=document.getElementById('lh-evname');
+  const currentName=evnameEl.textContent.replace(/^\/ /,'');
+  evnameEl.style.display='none';
+  // hide edit button
+  const editBtn=evnameEl.nextElementSibling;
+  if(editBtn)editBtn.style.display='none';
+  // create input
+  const inp=document.createElement('input');
+  inp.className='lh-evname-input';
+  inp.value=currentName;
+  inp.id='lh-evname-inp';
+  evnameEl.parentNode.insertBefore(inp,evnameEl.nextSibling);
+  inp.focus();inp.select();
+  function save(){
+    const newName=inp.value.trim()||currentName;
+    evnameEl.textContent=newName?`/ ${newName}`:'';
+    evnameEl.style.display='';
+    if(editBtn)editBtn.style.display='';
+    inp.remove();
+    // save to storage and firebase
+    const ev=getEvent(currentEventId);
+    if(ev){ev.name=newName;upsertEvent(ev);}
+    publishLiveState();
+  }
+  inp.addEventListener('blur',save);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')save();if(e.key==='Escape'){inp.remove();evnameEl.style.display='';if(editBtn)editBtn.style.display='';}});
 }
 
-/* shared countdown renderer */
-function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,progId,nextId){
-  const now=new Date();
+function liveRender(){
+  const ev=getEvent(currentEventId)||{};
+  renderCountdown(liveRows,appliedDelay,ev.date||'','live-tt-list','cd-label','cd-h','cd-m','cd-s','cd-sub','cd-prog','cd-next-wrap',true);
+}
 
-  // If eventDate is set, check if it's today, future, or past
-  let dayDiff=0; // 0=today or no date, >0=future days, <0=past days
-  let eventDateObj=null;
+/* COUNTDOWN (isLive=true enables lock toggle click) */
+function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,progId,nextId,isLive){
+  const now=new Date();
+  let dayDiff=0;
   if(eventDate){
-    eventDateObj=new Date(eventDate+'T00:00:00');
     const todayStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
     const todayObj=new Date(todayStr+'T00:00:00');
-    dayDiff=Math.round((eventDateObj-todayObj)/(1000*60*60*24));
+    const evObj=new Date(eventDate+'T00:00:00');
+    dayDiff=Math.round((evObj-todayObj)/(1000*60*60*24));
   }
-
-  // If event is in the future (not today), show countdown to event start
-  if(dayDiff>0){
-    const firstRow=[...rows].filter(r=>r.baseTime!=null).sort((a,b)=>a.baseTime-b.baseTime)[0];
-    const startMins=firstRow?(r=>r.locked?r.baseTime:r.baseTime+delay)(firstRow):9*60;
-    const eventStart=new Date(eventDate+`T${minsToStr(startMins)}:00`);
-    const diffMs=Math.max(0,eventStart-now);
-    const diffSecs=Math.floor(diffMs/1000);
-    const dd=Math.floor(diffSecs/86400);
-    const dh=Math.floor((diffSecs%86400)/3600);
-    const dm=Math.floor((diffSecs%3600)/60);
-    const ds=diffSecs%60;
-    const isFutureLive=(ttId==='live-tt-list');
-    document.getElementById(ttId).innerHTML=rows.map(r=>{
-      const rc='live-tt-row'+(r.locked?' is-locked-row':'');
-      const lockBtn=isFutureLive
-        ?`<div class="lt-lock-btn${r.locked?' locked':''}" onclick="toggleLiveLock(${r.id})" title="${r.locked?'クリックで解除':'クリックで固定'}">${r.locked?'🔒':'🔓'}</div>`
-        :`<div class="lt-lock-static">${r.locked?'🔒':''}</div>`;
-      return`<div class="${rc}">${lockBtn}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
-    }).join('');
-    document.getElementById(labelId).textContent=`イベント開始まで`;
-    if(dd>0){
-      document.getElementById(hId).textContent=pad(dd);
-      document.getElementById(mId).textContent=pad(dh);
-      document.getElementById(sId).textContent=pad(dm);
-      document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;
-    }else{
-      document.getElementById(hId).textContent=pad(dh);
-      document.getElementById(mId).textContent=pad(dm);
-      document.getElementById(sId).textContent=pad(ds);
-      document.getElementById(subId).textContent=`${formatDate(eventDate)} スタート`;
-    }
-    document.getElementById(progId).style.width='0%';
-    document.getElementById(nextId).innerHTML='';
-    return;
-  }
-
-  // If event was in the past (not today), show ended
-  if(dayDiff<0){
-    document.getElementById(ttId).innerHTML=rows.map(r=>{
-      const rc='live-tt-row is-done';
-      return`<div class="${rc}"><div></div><div><div class="lt-time">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`;
-    }).join('');
-    document.getElementById(labelId).textContent='イベントは終了しました';
-    ['cd-h','cd-m','cd-s'].forEach(id=>{ try{document.getElementById(id).textContent='--';}catch{} });
-    document.getElementById(hId).textContent='--';
-    document.getElementById(mId).textContent='--';
-    document.getElementById(sId).textContent='--';
-    document.getElementById(subId).textContent=formatDate(eventDate);
-    document.getElementById(progId).style.width='100%';
-    document.getElementById(nextId).innerHTML='';
-    return;
-  }
-
-  // Today (or no date set) — normal countdown logic
-  const nowMins=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
-  const nowSecs=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
 
   const eff=(r)=>r.locked?r.baseTime:r.baseTime+delay;
   const effStr=(r)=>minsToStr(eff(r));
 
+  // Helper to render a lock icon/button
+  function lockEl(r){
+    if(isLive){
+      const cls='live-lock-btn'+(r.locked?' is-locked':'');
+      return`<div class="${cls}" onclick="toggleLiveLock(${r.id})" title="${r.locked?'クリックで固定解除':'クリックで時刻固定'}">${r.locked?'🔒':'🔓'}</div>`;
+    }
+    return`<div style="font-size:14px;text-align:center;color:var(--warn);">${r.locked?'🔒':''}</div>`;
+  }
+
+  if(dayDiff>0){
+    const firstRow=[...rows].filter(r=>r.baseTime!=null).sort((a,b)=>a.baseTime-b.baseTime)[0];
+    const startMins=firstRow?eff(firstRow):9*60;
+    const eventStart=new Date(eventDate+`T${minsToStr(startMins)}:00`);
+    const diffMs=Math.max(0,eventStart-now);
+    const diffSecs=Math.floor(diffMs/1000);
+    const dd=Math.floor(diffSecs/86400),dh=Math.floor((diffSecs%86400)/3600),dm=Math.floor((diffSecs%3600)/60),ds=diffSecs%60;
+    document.getElementById(ttId).innerHTML=rows.map(r=>{
+      const rc='live-tt-row'+(r.locked?' is-locked-row':'');
+      return`<div class="${rc}">${lockEl(r)}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
+    }).join('');
+    document.getElementById(labelId).textContent=`イベント開始まで`;
+    if(dd>0){document.getElementById(hId).textContent=pad(dd);document.getElementById(mId).textContent=pad(dh);document.getElementById(sId).textContent=pad(dm);document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;}
+    else{document.getElementById(hId).textContent=pad(dh);document.getElementById(mId).textContent=pad(dm);document.getElementById(sId).textContent=pad(ds);document.getElementById(subId).textContent=`${formatDate(eventDate)} スタート`;}
+    document.getElementById(progId).style.width='0%';document.getElementById(nextId).innerHTML='';return;
+  }
+
+  if(dayDiff<0){
+    document.getElementById(ttId).innerHTML=rows.map(r=>`<div class="live-tt-row is-done"><div></div><div><div class="lt-time">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`).join('');
+    document.getElementById(labelId).textContent='イベントは終了しました';
+    [hId,mId,sId].forEach(id=>document.getElementById(id).textContent='--');
+    document.getElementById(subId).textContent=formatDate(eventDate);
+    document.getElementById(progId).style.width='100%';document.getElementById(nextId).innerHTML='';return;
+  }
+
+  const nowMins=now.getHours()*60+now.getMinutes()+now.getSeconds()/60;
+  const nowSecs=now.getHours()*3600+now.getMinutes()*60+now.getSeconds();
   const sorted=[...rows].filter(r=>r.baseTime!=null).sort((a,b)=>eff(a)-eff(b));
   let ai=-1;
   for(let i=0;i<sorted.length;i++){const s=eff(sorted[i]),e=i+1<sorted.length?eff(sorted[i+1]):Infinity;if(nowMins>=s&&nowMins<e){ai=i;break;}}
   const bf=sorted.length>0&&nowMins<eff(sorted[0]);
   const sm={};sorted.forEach((r,i)=>{if(i<ai)sm[r.id]='done';else if(i===ai)sm[r.id]='active';else if(i===ai+1||(ai===-1&&i===0&&bf))sm[r.id]='next';else sm[r.id]='upcoming';});
 
-  const isLiveView=(ttId==='live-tt-list');
   document.getElementById(ttId).innerHTML=rows.map(r=>{
     const st=sm[r.id]||'upcoming';
     const rc=['live-tt-row',st==='active'?'is-active':st==='done'?'is-done':st==='next'?'is-next':'',r.locked?'is-locked-row':''].filter(Boolean).join(' ');
     const badge=st==='active'?'<div class="lt-badge active">進行中</div>':st==='done'?'<div class="lt-badge done">終了</div>':st==='next'?'<div class="lt-badge next">NEXT</div>':'';
-    const adj=!r.locked&&delay!==0?`<div class="lt-adj">→${minsToStr(eff(r))}</div>`:'';
-    // Lock button: clickable in live view, static icon in viewer
-    const lockBtn=isLiveView
-      ?`<div class="lt-lock-btn${r.locked?' locked':''}" onclick="toggleLiveLock(${r.id})" title="${r.locked?'クリックで解除':'クリックで固定'}">${r.locked?'🔒':'🔓'}</div>`
-      :`<div class="lt-lock-static">${r.locked?'🔒':''}</div>`;
-    return`<div class="${rc}">${lockBtn}<div><div class="lt-time">${minsToStr(r.baseTime)}</div>${adj}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
+    const hasAdj=!r.locked&&delay!==0;
+    const timeHtml=hasAdj
+      ?`<div class="lt-time">${minsToStr(r.baseTime)}</div><div class="lt-adj">${minsToStr(eff(r))}</div>`
+      :`<div class="lt-time-only">${minsToStr(r.baseTime)}</div>`;
+    return`<div class="${rc}">${lockEl(r)}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
   }).join('');
 
   if(!sorted.length){
     document.getElementById(labelId).textContent='パートがありません';
     [hId,mId,sId].forEach(id=>document.getElementById(id).textContent='--');
-    document.getElementById(subId).textContent='';document.getElementById(progId).style.width='0%';
-    document.getElementById(nextId).innerHTML='';return;
+    document.getElementById(subId).textContent='';document.getElementById(progId).style.width='0%';document.getElementById(nextId).innerHTML='';return;
   }
   if(bf){
     const diff=Math.max(0,eff(sorted[0])*60-nowSecs);
@@ -1145,24 +1044,24 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   }else document.getElementById(nextId).innerHTML='';
 }
 
-/* ── VIEWER MODE ── */
+/* VIEWER */
 let viewerRows=[],viewerDelay=0,viewerEventDate='',viewerTick=null;
-
 function startViewerMode(sessionId){
   showScreen('screen-viewer');
   if(!fbDb){document.getElementById('vcd-sub').textContent='Firebase未接続。URLが正しいか確認してください。';return;}
-
   fbSubscribe(sessionId,data=>{
     viewerRows=(data.rows||[]).map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
     viewerDelay=data.appliedDelay||0;
     viewerEventDate=data.eventDate||'';
     document.getElementById('viewer-evname').textContent=data.eventName?`/ ${data.eventName}`:'';
+    const vdb=document.getElementById('viewer-evdate');
+    if(data.eventDate){vdb.textContent='📅 '+formatDate(data.eventDate);vdb.style.display='';}
+    else vdb.style.display='none';
     const ds=document.getElementById('viewer-delay-status');
     if(viewerDelay!==0){ds.style.display='flex';document.getElementById('viewer-delay-text').textContent=`現在 ${viewerDelay>0?'+':''}${viewerDelay}分 遅延中`;}
     else ds.style.display='none';
     viewerRender();
   });
-
   if(viewerTick)clearInterval(viewerTick);
   viewerTick=setInterval(()=>{
     const n=new Date();
@@ -1172,40 +1071,26 @@ function startViewerMode(sessionId){
     viewerRender();
   },1000);
 }
-
 function viewerRender(){
   if(!viewerRows.length)return;
-  renderCountdown(viewerRows,viewerDelay,viewerEventDate||'','viewer-tt-list','vcd-label','vcd-h','vcd-m','vcd-s','vcd-sub','vcd-prog','vcd-next-wrap');
+  renderCountdown(viewerRows,viewerDelay,viewerEventDate||'','viewer-tt-list','vcd-label','vcd-h','vcd-m','vcd-s','vcd-sub','vcd-prog','vcd-next-wrap',false);
 }
 
-/* ── BOOT ── */
+/* BOOT */
 (function(){
   const params=new URLSearchParams(location.search);
   const viewId=params.get('view');
-
   if(viewId){
-    // VIEWER MODE: try to get Firebase config from URL params first
-    const urlCfg={
-      apiKey:params.get('ak'),
-      authDomain:params.get('au'),
-      databaseURL:params.get('du'),
-      projectId:params.get('pi'),
-      appId:params.get('ai')
-    };
-    // Use URL config if present, otherwise fall back to saved config
+    const urlCfg={apiKey:params.get('ak'),authDomain:params.get('au'),databaseURL:params.get('du'),projectId:params.get('pi'),appId:params.get('ai')};
     const savedCfg=loadFbConfig();
     const cfgToUse=(urlCfg.apiKey&&urlCfg.databaseURL)?urlCfg:savedCfg;
     if(cfgToUse)initFirebase(cfgToUse);
     startViewerMode(viewId);
-  } else {
-    // OPERATOR MODE
+  }else{
     const savedCfg=loadFbConfig();
     if(savedCfg)initFirebase(savedCfg);
-    if(!savedCfg){
-      showScreen('screen-fbsetup');
-    } else {
-      renderHome();
-    }
+    if(!savedCfg)showScreen('screen-fbsetup');
+    else renderHome();
   }
 })();
 </script>
