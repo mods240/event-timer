@@ -272,6 +272,39 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .cd-ni-start{font-size:12px;letter-spacing:.08em;color:#8ab0cc;}
 .cd-ni-cd{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);white-space:nowrap;margin-left:10px;}
 
+/* ★ FULLSCREEN (both live and viewer) */
+let viewerIsFullscreen=false;
+let liveIsFullscreen=false;
+
+function toggleLiveFullscreen(){
+  const el=document.getElementById('live-cd-cur');
+  const btn=document.getElementById('live-fs-btn');
+  liveIsFullscreen=!liveIsFullscreen;
+  if(liveIsFullscreen){
+    el.classList.add('fullscreen-cd');
+    if(btn){btn.textContent='✕ 戻る';btn.style.cssText='position:absolute;top:16px;left:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:.15em;padding:8px 18px;border-radius:4px;cursor:pointer;z-index:10000;';}
+    document.body.style.overflow='hidden';
+  }else{
+    el.classList.remove('fullscreen-cd');
+    if(btn){btn.textContent='FULL';btn.style.cssText='';}
+    document.body.style.overflow='';
+  }
+}
+function toggleViewerFullscreen(){
+  const el=document.getElementById('vcd-cur');
+  const btn=document.getElementById('fs-btn');
+  viewerIsFullscreen=!viewerIsFullscreen;
+  if(viewerIsFullscreen){
+    el.classList.add('fullscreen-cd');
+    if(btn){btn.textContent='✕ 戻る';btn.style.cssText='position:absolute;top:16px;left:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:.15em;padding:8px 18px;border-radius:4px;cursor:pointer;z-index:10000;';}
+    document.body.style.overflow='hidden';
+  }else{
+    el.classList.remove('fullscreen-cd');
+    if(btn){btn.textContent='FULL';btn.style.cssText='';}
+    document.body.style.overflow='';
+  }
+}
+
 /* VIEWER */
 #screen-viewer{display:none;flex-direction:column;height:100vh;}
 #screen-viewer.active{display:flex;}
@@ -292,6 +325,35 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .share-hint{font-size:10px;letter-spacing:.14em;color:var(--muted);margin-top:12px;line-height:1.8;}
 
 ::-webkit-scrollbar{width:4px;}
+
+/* ★ VIEWER FULLSCREEN COUNTDOWN */
+.cd-cur.fullscreen-cd{
+  position:fixed;inset:0;z-index:9999;
+  border-radius:0;border:none;
+  background:#0a0e14;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px;
+  overflow:hidden;
+}
+.cd-cur.fullscreen-cd .cd-big{font-size:clamp(80px,18vw,200px);text-align:center;}
+.cd-cur.fullscreen-cd .cd-cur-label{font-size:clamp(16px,3vw,28px);text-align:center;padding:0;max-width:90vw;}
+.cd-cur.fullscreen-cd .cd-sub{font-size:clamp(13px,2vw,20px);text-align:center;}
+.cd-cur.fullscreen-cd .cd-prog-track{width:min(600px,80vw);margin-top:24px;}
+.cd-cur.fullscreen-cd .cd-now{font-size:14px;top:20px;right:20px;opacity:.7;}
+.fullscreen-hint{
+  position:absolute;bottom:24px;left:50%;transform:translateX(-50%);
+  font-size:11px;letter-spacing:.2em;color:var(--muted);opacity:.5;
+  white-space:nowrap;
+}
+.fs-btn{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.6);font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:10px;letter-spacing:.15em;padding:4px 10px;border-radius:3px;
+  cursor:pointer;transition:all .15s;z-index:10;
+}
+.fs-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(74,184,255,.16);border-radius:99px;}
 
@@ -421,6 +483,17 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
             <button class="tpl-btn" onclick="openTplSave()">💾 テンプレート保存</button>
           </div>
         </div>
+        <!-- ★ イベント名・日付（STEP2でも編集可） -->
+        <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:16px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:4px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:9px;letter-spacing:.25em;color:var(--muted);margin-bottom:5px;">イベント名</div>
+            <input id="wz-evname2" style="width:100%;background:none;border:none;border-bottom:1px solid rgba(56,200,255,.3);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:16px;font-weight:700;padding:5px 0;outline:none;transition:border-color .2s;" placeholder="イベント名を入力..." oninput="syncEvName2()">
+          </div>
+          <div style="min-width:160px;">
+            <div style="font-size:9px;letter-spacing:.25em;color:var(--muted);margin-bottom:5px;">開催日（任意）</div>
+            <input id="wz-evdate2" type="date" style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;padding:6px 10px;outline:none;transition:border-color .2s;" oninput="syncEvDate2()">
+          </div>
+        </div>
         <div class="tt-col-headers">
           <div><input type="checkbox" id="sel-all" title="全て選択" style="cursor:pointer;accent-color:var(--accent);width:13px;height:13px;" onchange="toggleSelAll(this.checked)"></div>
           <div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div>
@@ -492,12 +565,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     <div class="live-cd">
       <div class="live-cd-title">REALTIME STATUS</div>
       <div class="delay-status" id="delay-status"><span style="font-size:12px">⚠</span><div class="delay-status-text" id="delay-status-text"></div></div>
-      <div class="cd-cur">
+      <div class="cd-cur" id="live-cd-cur">
         <div class="cd-now">NOW</div>
         <div class="cd-cur-label" id="cd-label">—</div>
         <div class="cd-big"><span id="cd-h">--</span><span class="colon">:</span><span id="cd-m">--</span><span class="colon">:</span><span id="cd-s">--</span></div>
         <div class="cd-sub" id="cd-sub">読み込み中...</div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="cd-prog" style="width:0%"></div></div>
+        <button class="fs-btn" id="live-fs-btn" onclick="toggleLiveFullscreen()">FULL</button>
       </div>
       <div id="cd-next-wrap"></div>
     </div>
@@ -525,12 +599,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     <div class="live-cd">
       <div class="live-cd-title">REALTIME STATUS</div>
       <div class="delay-status on" id="viewer-delay-status" style="display:none"><span style="font-size:12px">⚠</span><div class="delay-status-text" id="viewer-delay-text"></div></div>
-      <div class="cd-cur">
+      <div class="cd-cur" id="vcd-cur">
         <div class="cd-now">NOW</div>
         <div class="cd-cur-label" id="vcd-label">—</div>
         <div class="cd-big"><span id="vcd-h">--</span><span class="colon">:</span><span id="vcd-m">--</span><span class="colon">:</span><span id="vcd-s">--</span></div>
         <div class="cd-sub" id="vcd-sub">進行データを受信中...</div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="vcd-prog" style="width:0%"></div></div>
+        <button class="fs-btn" id="fs-btn" onclick="event.stopPropagation();toggleViewerFullscreen()">FULL</button>
       </div>
       <div id="vcd-next-wrap"></div>
     </div>
@@ -725,6 +800,15 @@ function loadWzFromEvent(ev){
 }
 function goEdit(){stopLiveTick();const ev=getEvent(currentEventId);if(ev)loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
 function onEvNameInput(){document.getElementById('wz-next-btn').disabled=!document.getElementById('wz-evname').value.trim();}
+function syncEvName2(){
+  // sync step2 name field → step1 field
+  const v=document.getElementById('wz-evname2').value;
+  document.getElementById('wz-evname').value=v;
+  document.getElementById('wz-next-btn').disabled=!v.trim();
+}
+function syncEvDate2(){
+  document.getElementById('wz-evdate').value=document.getElementById('wz-evdate2').value;
+}
 
 function setWzStep(n){
   currentWzStep=n;
@@ -739,7 +823,15 @@ function setWzStep(n){
     const dateEl=document.getElementById('wz-evdate');
     if(!dateEl.value){const t=new Date();dateEl.value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;}
   }
-  else if(n===2){nb.disabled=false;nb.textContent='次へ →';fh.textContent='パートを追加したら「次へ」へ';renderWzTable();}
+  else if(n===2){
+    nb.disabled=false;nb.textContent='次へ →';fh.textContent='パートを追加したら「次へ」へ';
+    // populate step2 name/date fields from step1
+    const n2=document.getElementById('wz-evname2');
+    const d2=document.getElementById('wz-evdate2');
+    if(n2)n2.value=document.getElementById('wz-evname').value||'';
+    if(d2)d2.value=document.getElementById('wz-evdate').value||'';
+    renderWzTable();
+  }
   else if(n===3){nb.disabled=false;nb.textContent='▶ 進行を開始';fh.textContent='内容を確認して開始';renderWzConfirm();}
 }
 function nextStep(n){
@@ -1089,10 +1181,44 @@ function viewerRender(){
   }else{
     const savedCfg=loadFbConfig();
     if(savedCfg)initFirebase(savedCfg);
+    // Insert sample event on very first launch
+    if(loadEvents().length===0){
+      const today=new Date();
+      const nextMonth=new Date(today.getFullYear(),today.getMonth()+1,today.getDate());
+      const td=`${nextMonth.getFullYear()}-${pad(nextMonth.getMonth()+1)}-${pad(nextMonth.getDate())}`;
+      const sampleEv={
+        id:'ev_sample',
+        name:'【サンプル】式典イベント',
+        date:td,
+        rows:[
+          {baseTime:13*60+0,  label:'開場・受付',          locked:false},
+          {baseTime:13*60+30, label:'開会の挨拶',           locked:false},
+          {baseTime:13*60+40, label:'来賓スピーチ',         locked:false},
+          {baseTime:14*60+0,  label:'社長挨拶',             locked:true },
+          {baseTime:14*60+15, label:'表彰式',               locked:false},
+          {baseTime:14*60+45, label:'記念撮影',             locked:false},
+          {baseTime:15*60+0,  label:'懇親会スタート',       locked:true },
+          {baseTime:16*60+30, label:'閉会',                 locked:true },
+        ],
+        updatedAt:Date.now()
+      };
+      upsertEvent(sampleEv);
+    }
     if(!savedCfg)showScreen('screen-fbsetup');
     else renderHome();
   }
 })();
+
+// Shift+F to toggle fullscreen on whichever screen is active
+document.addEventListener('keydown', e=>{
+  if(e.shiftKey && e.key==='F'){
+    e.preventDefault();
+    const liveActive=document.getElementById('screen-live').classList.contains('active');
+    const viewerActive=document.getElementById('screen-viewer').classList.contains('active');
+    if(liveActive) toggleLiveFullscreen();
+    else if(viewerActive) toggleViewerFullscreen();
+  }
+});
 </script>
 </body>
 </html>
