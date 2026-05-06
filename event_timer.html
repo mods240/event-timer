@@ -328,13 +328,16 @@ function toggleViewerFullscreen(){
 
 /* ★ VIEWER FULLSCREEN COUNTDOWN */
 .cd-cur.fullscreen-cd{
-  position:fixed;inset:0;z-index:9999;
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:9999;
   border-radius:0;border:none;
   background:#0a0e14;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   padding:40px;
   overflow:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 .cd-cur.fullscreen-cd .cd-big{font-size:clamp(80px,18vw,200px);text-align:center;}
 .cd-cur.fullscreen-cd .cd-cur-label{font-size:clamp(16px,3vw,28px);text-align:center;padding:0;max-width:90vw;}
@@ -347,21 +350,28 @@ function toggleViewerFullscreen(){
   white-space:nowrap;
 }
 .fs-btn{
-  position:absolute;bottom:10px;right:10px;
-  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
-  color:rgba(255,255,255,.6);font-family:'Zen Kaku Gothic New',sans-serif;
-  font-size:10px;letter-spacing:.15em;padding:4px 10px;border-radius:3px;
-  cursor:pointer;transition:all .15s;z-index:10;
+  display:block;
+  width:100%;
+  margin-top:10px;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.5);
+  font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:10px;letter-spacing:.2em;
+  padding:6px 0;border-radius:3px;
+  cursor:pointer;transition:all .15s;
+  text-align:center;
 }
-.fs-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
+.fs-btn:hover{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3);}
+.fs-btn.active{background:rgba(255,255,255,.12);color:#fff;border-color:rgba(255,255,255,.3);}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(74,184,255,.16);border-radius:99px;}
 
 /* MOBILE */
 @media(max-width:768px){
-  .live-main,#screen-viewer .live-main{grid-template-columns:1fr !important;grid-template-rows:65vh 35vh;overflow:hidden;}
-  .live-tt{border-right:none !important;border-bottom:2px solid var(--border);padding:10px 14px !important;overflow-y:auto;height:65vh;}
-  .live-cd{padding:8px 12px !important;overflow-y:auto;height:35vh;gap:5px !important;}
+  .live-main,#screen-viewer .live-main{grid-template-columns:1fr !important;grid-template-rows:45vh 55vh;overflow:hidden;}
+  .live-tt{border-right:none !important;border-bottom:2px solid var(--border);padding:10px 14px !important;overflow-y:auto;height:45vh;}
+  .live-cd{padding:8px 12px !important;overflow-y:auto;height:55vh;gap:5px !important;}
   .live-header{flex-wrap:wrap;padding:8px 12px !important;gap:6px !important;}
   .lh-left{flex:1 1 100%;}
   .delay-bar{flex:1 1 auto;justify-content:center;}
@@ -702,11 +712,16 @@ function openShareModal(){
   if(!fbConnected||!currentSessionId){alert('Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。');return;}
   const cfg=loadFbConfig()||{};
   const params=new URLSearchParams({view:currentSessionId,ak:cfg.apiKey||'',au:cfg.authDomain||'',du:cfg.databaseURL||'',pi:cfg.projectId||'',ai:cfg.appId||''});
-  const url=`${location.href.split('?')[0]}?${params.toString()}`;
-  document.getElementById('share-url-text').textContent=url;
+  const fullUrl=`${location.href.split('?')[0]}?${params.toString()}`;
+  // Short URL for QR (just session ID — viewer will prompt for Firebase if not cached)
+  const shortParams=new URLSearchParams({view:currentSessionId,ak:cfg.apiKey||'',au:cfg.authDomain||'',du:cfg.databaseURL||'',pi:cfg.projectId||'',ai:cfg.appId||''});
+  // Encode config as compact base64 to shorten URL
+  const cfgB64=btoa(JSON.stringify({ak:cfg.apiKey||'',au:cfg.authDomain||'',du:cfg.databaseURL||'',pi:cfg.projectId||'',ai:cfg.appId||''}));
+  const compactUrl=`${location.href.split('?')[0]}?view=${currentSessionId}&c=${encodeURIComponent(cfgB64)}`;
+  document.getElementById('share-url-text').textContent=fullUrl;
   const qrDiv=document.getElementById('share-qr');
   qrDiv.innerHTML='';
-  new QRCode(qrDiv,{text:url,width:240,height:240,colorDark:'#ffffff',colorLight:'#0d1318'});
+  new QRCode(qrDiv,{text:compactUrl,width:260,height:260,colorDark:'#000000',colorLight:'#ffffff',correctLevel:0});
   switchShareTab('qr');
   openModal('modal-share');
 }
@@ -1173,7 +1188,9 @@ function viewerRender(){
   const params=new URLSearchParams(location.search);
   const viewId=params.get('view');
   if(viewId){
-    const urlCfg={apiKey:params.get('ak'),authDomain:params.get('au'),databaseURL:params.get('du'),projectId:params.get('pi'),appId:params.get('ai')};
+    let urlCfg={apiKey:params.get('ak'),authDomain:params.get('au'),databaseURL:params.get('du'),projectId:params.get('pi'),appId:params.get('ai')};
+    // also support compact base64 config
+    if(params.get('c')){try{const d=JSON.parse(atob(decodeURIComponent(params.get('c'))));urlCfg={apiKey:d.ak,authDomain:d.au,databaseURL:d.du,projectId:d.pi,appId:d.ai};}catch(e){}}
     const savedCfg=loadFbConfig();
     const cfgToUse=(urlCfg.apiKey&&urlCfg.databaseURL)?urlCfg:savedCfg;
     if(cfgToUse)initFirebase(cfgToUse);
