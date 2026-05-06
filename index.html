@@ -272,8 +272,22 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .cd-ni-start{font-size:12px;letter-spacing:.08em;color:#8ab0cc;}
 .cd-ni-cd{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--accent);white-space:nowrap;margin-left:10px;}
 
-/* ★ VIEWER FULLSCREEN */
+/* ★ FULLSCREEN (both live and viewer) */
 let viewerIsFullscreen=false;
+let liveIsFullscreen=false;
+
+function toggleLiveFullscreen(){
+  const el=document.getElementById('live-cd-cur');
+  const btn=document.getElementById('live-fs-btn');
+  liveIsFullscreen=!liveIsFullscreen;
+  if(liveIsFullscreen){
+    el.classList.add('fullscreen-cd');
+    if(btn)btn.textContent='✕ 戻る';
+  }else{
+    el.classList.remove('fullscreen-cd');
+    if(btn)btn.textContent='FULL';
+  }
+}
 function toggleViewerFullscreen(){
   const el=document.getElementById('vcd-cur');
   const btn=document.getElementById('fs-btn');
@@ -547,12 +561,13 @@ function toggleViewerFullscreen(){
     <div class="live-cd">
       <div class="live-cd-title">REALTIME STATUS</div>
       <div class="delay-status" id="delay-status"><span style="font-size:12px">⚠</span><div class="delay-status-text" id="delay-status-text"></div></div>
-      <div class="cd-cur">
+      <div class="cd-cur" id="live-cd-cur">
         <div class="cd-now">NOW</div>
         <div class="cd-cur-label" id="cd-label">—</div>
         <div class="cd-big"><span id="cd-h">--</span><span class="colon">:</span><span id="cd-m">--</span><span class="colon">:</span><span id="cd-s">--</span></div>
         <div class="cd-sub" id="cd-sub">読み込み中...</div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="cd-prog" style="width:0%"></div></div>
+        <button class="fs-btn" id="live-fs-btn" onclick="toggleLiveFullscreen()">FULL</button>
       </div>
       <div id="cd-next-wrap"></div>
     </div>
@@ -1189,6 +1204,17 @@ function viewerRender(){
     else renderHome();
   }
 })();
+
+// Shift+F to toggle fullscreen on whichever screen is active
+document.addEventListener('keydown', e=>{
+  if(e.shiftKey && e.key==='F'){
+    e.preventDefault();
+    const liveActive=document.getElementById('screen-live').classList.contains('active');
+    const viewerActive=document.getElementById('screen-viewer').classList.contains('active');
+    if(liveActive) toggleLiveFullscreen();
+    else if(viewerActive) toggleViewerFullscreen();
+  }
+});
 </script>
 </body>
 </html>
