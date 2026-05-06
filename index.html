@@ -276,14 +276,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 let viewerIsFullscreen=false;
 function toggleViewerFullscreen(){
   const el=document.getElementById('vcd-cur');
-  const hint=document.getElementById('fs-hint');
+  const btn=document.getElementById('fs-btn');
   viewerIsFullscreen=!viewerIsFullscreen;
   if(viewerIsFullscreen){
     el.classList.add('fullscreen-cd');
-    if(hint)hint.textContent='タップで戻る';
+    if(btn)btn.textContent='✕ 戻る';
   }else{
     el.classList.remove('fullscreen-cd');
-    if(hint)hint.textContent='タップでフルスクリーン';
+    if(btn)btn.textContent='FULL';
   }
 }
 
@@ -328,6 +328,14 @@ function toggleViewerFullscreen(){
   font-size:11px;letter-spacing:.2em;color:var(--muted);opacity:.5;
   white-space:nowrap;
 }
+.fs-btn{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);
+  color:rgba(255,255,255,.6);font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:10px;letter-spacing:.15em;padding:4px 10px;border-radius:3px;
+  cursor:pointer;transition:all .15s;z-index:10;
+}
+.fs-btn:hover{background:rgba(255,255,255,.15);color:#fff;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:rgba(74,184,255,.16);border-radius:99px;}
 
@@ -457,6 +465,17 @@ function toggleViewerFullscreen(){
             <button class="tpl-btn" onclick="openTplSave()">💾 テンプレート保存</button>
           </div>
         </div>
+        <!-- ★ イベント名・日付（STEP2でも編集可） -->
+        <div style="display:flex;gap:14px;align-items:flex-end;margin-bottom:16px;padding:14px 16px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:4px;flex-wrap:wrap;">
+          <div style="flex:1;min-width:180px;">
+            <div style="font-size:9px;letter-spacing:.25em;color:var(--muted);margin-bottom:5px;">イベント名</div>
+            <input id="wz-evname2" style="width:100%;background:none;border:none;border-bottom:1px solid rgba(56,200,255,.3);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:16px;font-weight:700;padding:5px 0;outline:none;transition:border-color .2s;" placeholder="イベント名を入力..." oninput="syncEvName2()">
+          </div>
+          <div style="min-width:160px;">
+            <div style="font-size:9px;letter-spacing:.25em;color:var(--muted);margin-bottom:5px;">開催日（任意）</div>
+            <input id="wz-evdate2" type="date" style="background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:3px;color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;padding:6px 10px;outline:none;transition:border-color .2s;" oninput="syncEvDate2()">
+          </div>
+        </div>
         <div class="tt-col-headers">
           <div><input type="checkbox" id="sel-all" title="全て選択" style="cursor:pointer;accent-color:var(--accent);width:13px;height:13px;" onchange="toggleSelAll(this.checked)"></div>
           <div></div><div>固定</div><div>開始時刻</div><div>パート名</div><div></div>
@@ -561,13 +580,13 @@ function toggleViewerFullscreen(){
     <div class="live-cd">
       <div class="live-cd-title">REALTIME STATUS</div>
       <div class="delay-status on" id="viewer-delay-status" style="display:none"><span style="font-size:12px">⚠</span><div class="delay-status-text" id="viewer-delay-text"></div></div>
-      <div class="cd-cur" id="vcd-cur" onclick="toggleViewerFullscreen()" title="クリックでフルスクリーン" style="cursor:pointer;">
+      <div class="cd-cur" id="vcd-cur">
         <div class="cd-now">NOW</div>
         <div class="cd-cur-label" id="vcd-label">—</div>
         <div class="cd-big"><span id="vcd-h">--</span><span class="colon">:</span><span id="vcd-m">--</span><span class="colon">:</span><span id="vcd-s">--</span></div>
         <div class="cd-sub" id="vcd-sub">進行データを受信中...</div>
         <div class="cd-prog-track"><div class="cd-prog-fill" id="vcd-prog" style="width:0%"></div></div>
-        <div class="fullscreen-hint" id="fs-hint">タップでフルスクリーン</div>
+        <button class="fs-btn" id="fs-btn" onclick="event.stopPropagation();toggleViewerFullscreen()">FULL</button>
       </div>
       <div id="vcd-next-wrap"></div>
     </div>
@@ -762,6 +781,15 @@ function loadWzFromEvent(ev){
 }
 function goEdit(){stopLiveTick();const ev=getEvent(currentEventId);if(ev)loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
 function onEvNameInput(){document.getElementById('wz-next-btn').disabled=!document.getElementById('wz-evname').value.trim();}
+function syncEvName2(){
+  // sync step2 name field → step1 field
+  const v=document.getElementById('wz-evname2').value;
+  document.getElementById('wz-evname').value=v;
+  document.getElementById('wz-next-btn').disabled=!v.trim();
+}
+function syncEvDate2(){
+  document.getElementById('wz-evdate').value=document.getElementById('wz-evdate2').value;
+}
 
 function setWzStep(n){
   currentWzStep=n;
@@ -776,7 +804,15 @@ function setWzStep(n){
     const dateEl=document.getElementById('wz-evdate');
     if(!dateEl.value){const t=new Date();dateEl.value=`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;}
   }
-  else if(n===2){nb.disabled=false;nb.textContent='次へ →';fh.textContent='パートを追加したら「次へ」へ';renderWzTable();}
+  else if(n===2){
+    nb.disabled=false;nb.textContent='次へ →';fh.textContent='パートを追加したら「次へ」へ';
+    // populate step2 name/date fields from step1
+    const n2=document.getElementById('wz-evname2');
+    const d2=document.getElementById('wz-evdate2');
+    if(n2)n2.value=document.getElementById('wz-evname').value||'';
+    if(d2)d2.value=document.getElementById('wz-evdate').value||'';
+    renderWzTable();
+  }
   else if(n===3){nb.disabled=false;nb.textContent='▶ 進行を開始';fh.textContent='内容を確認して開始';renderWzConfirm();}
 }
 function nextStep(n){
@@ -1129,7 +1165,8 @@ function viewerRender(){
     // Insert sample event on very first launch
     if(loadEvents().length===0){
       const today=new Date();
-      const td=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
+      const nextMonth=new Date(today.getFullYear(),today.getMonth()+1,today.getDate());
+      const td=`${nextMonth.getFullYear()}-${pad(nextMonth.getMonth()+1)}-${pad(nextMonth.getDate())}`;
       const sampleEv={
         id:'ev_sample',
         name:'【サンプル】式典イベント',
