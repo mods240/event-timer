@@ -276,23 +276,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 let viewerIsFullscreen=false;
 let liveIsFullscreen=false;
 
-function toggleLiveFullscreen(){
-  liveIsFullscreen=!liveIsFullscreen;
-  const btn=document.getElementById('live-fs-btn');
-  if(btn){btn.textContent=liveIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',liveIsFullscreen);}
-  window.parent.postMessage({type:'fullscreen',active:liveIsFullscreen},'*');
-}
-    document.body.style.overflow='hidden';
-  }else{
-    el.classList.remove('fullscreen-cd');
-    if(btn){btn.textContent='FULL';btn.style.cssText='';}
-    document.body.style.overflow='';
-  }
-}
-function toggleViewerFullscreen(){
-  viewerIsFullscreen=!viewerIsFullscreen;
-  const btn=document.getElementById('fs-btn');
-  if(btn){btn.textContent=viewerIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',viewerIsFullscreen);}
+
   window.parent.postMessage({type:'fullscreen',active:viewerIsFullscreen},'*');
 }
     document.body.style.overflow='hidden';
@@ -1179,6 +1163,24 @@ function startViewerMode(sessionId){
 function viewerRender(){
   if(!viewerRows.length)return;
   renderCountdown(viewerRows,viewerDelay,viewerEventDate||'','viewer-tt-list','vcd-label','vcd-h','vcd-m','vcd-s','vcd-sub','vcd-prog','vcd-next-wrap',false);
+}
+
+/* ★ FULLSCREEN */
+let liveIsFullscreen=false;
+let viewerIsFullscreen=false;
+
+function toggleLiveFullscreen(){
+  liveIsFullscreen=!liveIsFullscreen;
+  const btn=document.getElementById('live-fs-btn');
+  if(btn){btn.textContent=liveIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',liveIsFullscreen);}
+  window.parent.postMessage({type:'fullscreen',active:liveIsFullscreen},'*');
+}
+
+function toggleViewerFullscreen(){
+  viewerIsFullscreen=!viewerIsFullscreen;
+  const btn=document.getElementById('fs-btn');
+  if(btn){btn.textContent=viewerIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',viewerIsFullscreen);}
+  window.parent.postMessage({type:'fullscreen',active:viewerIsFullscreen},'*');
 }
 
 /* BOOT */
