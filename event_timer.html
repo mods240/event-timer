@@ -360,13 +360,16 @@ let liveIsFullscreen=false;
 }
 #fs-overlay .cd-big{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(120px,28vw,380px);
+  font-size:min(95vw/6, 95vh/2);
   line-height:.9;
   color:#ffffff;
   text-shadow:0 0 60px rgba(56,200,255,.5);
   text-align:center;
-  width:100%;
+  width:95vw;
   letter-spacing:-.01em;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 #fs-overlay .cd-big .colon{color:var(--accent);animation:blink 1s step-end infinite;}
 #fs-overlay .cd-sub{
