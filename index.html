@@ -148,14 +148,21 @@
 
   /* ── FULLSCREEN MODE ── */
   .app-frame.fullscreen{
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    width:100vw;
-    height:100vh;
-    z-index:9999;
-    background:#0a0e14;
+    position:fixed !important;
+    top:0 !important;
+    left:0 !important;
+    width:100vw !important;
+    height:100vh !important;
+    z-index:9999 !important;
+    background:#0a0e14 !important;
+    border:none !important;
   }
-  .ad-bar.hidden{display:none;}
+  .ad-bar.hidden{
+    display:none !important;
+  }
+  body.fullscreen-mode{
+    overflow:hidden;
+  }
 </style>
 </head>
 <body>
@@ -215,9 +222,11 @@ window.addEventListener('message', function(e){
   const adBar=document.querySelector('.ad-bar');
   if(e.data.active){
     frame.classList.add('fullscreen');
+    document.body.classList.add('fullscreen-mode');
     if(adBar)adBar.classList.add('hidden');
   }else{
     frame.classList.remove('fullscreen');
+    document.body.classList.remove('fullscreen-mode');
     if(adBar)adBar.classList.remove('hidden');
   }
 });
@@ -226,10 +235,10 @@ document.addEventListener('keydown', function(e){
   if(e.key==='Escape'){
     const frame=document.querySelector('.app-frame');
     const adBar=document.querySelector('.ad-bar');
-    if(frame.classList.contains('fullscreen')){
+    if(frame&&frame.classList.contains('fullscreen')){
       frame.classList.remove('fullscreen');
+      document.body.classList.remove('fullscreen-mode');
       if(adBar)adBar.classList.remove('hidden');
-      // notify iframe
       frame.contentWindow.postMessage({type:'fullscreen-cancel'},'*');
     }
   }
