@@ -360,7 +360,7 @@ let liveIsFullscreen=false;
 }
 #fs-overlay .cd-big{
   font-family:'Bebas Neue',sans-serif;
-  font-size:40vw;
+  font-size:35vw;
   line-height:.9;
   color:#ffffff;
   text-shadow:0 0 60px rgba(56,200,255,.5);
@@ -1414,7 +1414,7 @@ function toggleViewerFullscreen(){
 }
 
 /* ★ FULLSCREEN OVERLAY FUNCTIONS */
-let fsSizeVw=40;
+let fsSizeVw=35;
 function changeFsSize(delta){
   fsSizeVw=Math.max(10,Math.min(90,fsSizeVw+delta));
   const el=document.getElementById('fs-cd-big');
