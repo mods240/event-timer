@@ -145,6 +145,17 @@
       height:50px;
     }
   }
+
+  /* ── FULLSCREEN MODE ── */
+  .app-frame.fullscreen{
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    width:100vw;
+    height:100vh;
+    z-index:9999;
+    background:#0a0e14;
+  }
+  .ad-bar.hidden{display:none;}
 </style>
 </head>
 <body>
@@ -196,5 +207,33 @@
 
 </div>
 
+<script>
+// Listen for fullscreen messages from iframe (event_timer.html)
+window.addEventListener('message', function(e){
+  if(!e.data||e.data.type!=='fullscreen')return;
+  const frame=document.querySelector('.app-frame');
+  const adBar=document.querySelector('.ad-bar');
+  if(e.data.active){
+    frame.classList.add('fullscreen');
+    if(adBar)adBar.classList.add('hidden');
+  }else{
+    frame.classList.remove('fullscreen');
+    if(adBar)adBar.classList.remove('hidden');
+  }
+});
+// ESC key to exit fullscreen
+document.addEventListener('keydown', function(e){
+  if(e.key==='Escape'){
+    const frame=document.querySelector('.app-frame');
+    const adBar=document.querySelector('.ad-bar');
+    if(frame.classList.contains('fullscreen')){
+      frame.classList.remove('fullscreen');
+      if(adBar)adBar.classList.remove('hidden');
+      // notify iframe
+      frame.contentWindow.postMessage({type:'fullscreen-cancel'},'*');
+    }
+  }
+});
+</script>
 </body>
 </html>

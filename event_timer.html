@@ -1236,6 +1236,16 @@ document.addEventListener('keydown', e=>{
     else if(viewerActive) toggleViewerFullscreen();
   }
 });
+// Listen for fullscreen cancel from parent (e.g. ESC key)
+window.addEventListener('message', e=>{
+  if(e.data&&e.data.type==='fullscreen-cancel'){
+    liveIsFullscreen=false;viewerIsFullscreen=false;
+    const lb=document.getElementById('live-fs-btn');
+    const vb=document.getElementById('fs-btn');
+    if(lb){lb.textContent='FULL';lb.classList.remove('active');}
+    if(vb){vb.textContent='FULL';vb.classList.remove('active');}
+  }
+});
 </script>
 </body>
 </html>
