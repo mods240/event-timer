@@ -433,6 +433,7 @@ let liveIsFullscreen=false;
   .live-tt-row{padding:10px 10px !important;margin-bottom:4px !important;}
   .lt-label{font-size:15px !important;}
   .lt-time{font-size:20px !important;}
+  .lt-time-only{font-size:20px !important;}
   #vcd-next-wrap .cd-next-title{font-size:11px !important;}
   #vcd-next-wrap .cd-ni{padding:6px 8px !important;}
   #vcd-next-wrap .cd-ni-label{font-size:12px !important;}
@@ -1127,7 +1128,7 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const dd=Math.floor(diffSecs/86400),dh=Math.floor((diffSecs%86400)/3600),dm=Math.floor((diffSecs%3600)/60),ds=diffSecs%60;
     document.getElementById(ttId).innerHTML=rows.map(r=>{
       const rc='live-tt-row'+(r.locked?' is-locked-row':'');
-      return`<div class="${rc}">${lockEl(r)}<div><div class="lt-time" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
+      return`<div class="${rc}">${lockEl(r)}<div><div class="lt-time-only" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
     }).join('');
     document.getElementById(labelId).textContent=`イベント開始まで`;
     if(dd>0){document.getElementById(hId).textContent=pad(dd);document.getElementById(mId).textContent=pad(dh);document.getElementById(sId).textContent=pad(dm);document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;}
@@ -1136,7 +1137,7 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   }
 
   if(dayDiff<0){
-    document.getElementById(ttId).innerHTML=rows.map(r=>`<div class="live-tt-row is-done"><div></div><div><div class="lt-time">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`).join('');
+    document.getElementById(ttId).innerHTML=rows.map(r=>`<div class="live-tt-row is-done"><div></div><div><div class="lt-time-only" style="color:var(--muted)">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`).join('');
     document.getElementById(labelId).textContent='イベントは終了しました';
     [hId,mId,sId].forEach(id=>document.getElementById(id).textContent='--');
     document.getElementById(subId).textContent=formatDate(eventDate);
