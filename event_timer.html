@@ -651,18 +651,12 @@ let liveIsFullscreen=false;
     <div class="live-tt">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="live-tt-title" style="margin-bottom:0;">TIMETABLE</div>
-        <div style="display:flex;align-items:center;gap:5px;">
+        <div style="display:flex;align-items:center;gap:6px;">
           <input type="checkbox" class="live-sel-all" id="live-sel-all" onchange="toggleLiveSelAll(this.checked)" title="全て選択">
-          <span style="font-size:9px;letter-spacing:.12em;color:var(--muted);">全選択</span>
+          <span style="font-size:9px;letter-spacing:.12em;color:var(--muted);">全選択（遅延反映対象）</span>
         </div>
       </div>
-      <div class="live-bulk-bar">
-        <span class="live-bulk-label">選択行シフト</span>
-        <input class="live-bulk-input" type="number" id="live-bulk-val" value="0" placeholder="分">
-        <span class="live-bulk-unit">分</span>
-        <button class="live-bulk-btn" onclick="applyLiveBulkShift()">適用</button>
-      </div>
-      <div id="live-tt-list" style="margin-top:8px;"></div>
+      <div id="live-tt-list"></div>
     </div>
     <div class="live-cd">
       <div class="live-cd-title">REALTIME STATUS</div>
@@ -1042,6 +1036,7 @@ function saveAndStartLive(){
 }
 
 let liveTick=null,liveRows=[];
+let liveCheckedIds=new Set(); // track checked row IDs across renders
 function startLive(ev){
   const event=ev||getEvent(currentEventId);if(!event)return;
   liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
@@ -1118,10 +1113,31 @@ function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
 function getEffStr(r){return minsToStr(getEff(r));}
 function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
 function applyDelay(){
-  appliedDelay=pendingDelay;
-  const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
-  if(appliedDelay===0)ds.classList.remove('on');
-  else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
+  // If any checkboxes are checked, only shift those rows (not locked)
+  const checkedBoxes=document.querySelectorAll('.live-sel-cb:checked');
+  if(checkedBoxes.length>0){
+    // selective shift: directly modify baseTime of checked unlocked rows
+    const shiftMins=pendingDelay-appliedDelay; // delta from current applied
+    checkedBoxes.forEach(cb=>{
+      const id=parseInt(cb.dataset.id);
+      const r=liveRows.find(r=>r.id===id);
+      if(r&&!r.locked) r.baseTime=Math.max(0,r.baseTime+shiftMins);
+    });
+    // save back
+    const ev=getEvent(currentEventId);
+    if(ev){ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));upsertEvent(ev);}
+    // reset delay counter since we applied directly to baseTime
+    appliedDelay=0;pendingDelay=0;
+    document.getElementById('delay-val').textContent='+0分';
+    document.getElementById('delay-status').classList.remove('on');
+    liveCheckedIds.clear();
+  } else {
+    // no selection: apply to all unlocked rows (original behavior)
+    appliedDelay=pendingDelay;
+    const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
+    if(appliedDelay===0)ds.classList.remove('on');
+    else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
+  }
   liveRender();publishLiveState();
 }
 function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
@@ -1164,8 +1180,19 @@ function startEditEvName(){
 }
 
 function liveRender(){
+  // Save checked state before re-render
+  document.querySelectorAll('.live-sel-cb:checked').forEach(cb=>{
+    liveCheckedIds.add(parseInt(cb.dataset.id));
+  });
+  document.querySelectorAll('.live-sel-cb:not(:checked)').forEach(cb=>{
+    liveCheckedIds.delete(parseInt(cb.dataset.id));
+  });
   const ev=getEvent(currentEventId)||{};
   renderCountdown(liveRows,appliedDelay,ev.date||'','live-tt-list','cd-label','cd-h','cd-m','cd-s','cd-sub','cd-prog','cd-next-wrap',true);
+  // Restore checked state
+  document.querySelectorAll('.live-sel-cb').forEach(cb=>{
+    cb.checked=liveCheckedIds.has(parseInt(cb.dataset.id));
+  });
 }
 
 /* COUNTDOWN (isLive=true enables lock toggle click) */
