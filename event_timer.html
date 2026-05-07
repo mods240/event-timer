@@ -1128,7 +1128,11 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const dd=Math.floor(diffSecs/86400),dh=Math.floor((diffSecs%86400)/3600),dm=Math.floor((diffSecs%3600)/60),ds=diffSecs%60;
     document.getElementById(ttId).innerHTML=rows.map(r=>{
       const rc='live-tt-row'+(r.locked?' is-locked-row':'');
-      return`<div class="${rc}">${lockEl(r)}<div><div class="lt-time-only" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
+      const hasAdjF=!r.locked&&delay!==0;
+      const timeHtmlF=hasAdjF
+        ?`<div class="lt-time">${minsToStr(r.baseTime)}</div><div class="lt-adj">${minsToStr(eff(r))}</div>`
+        :`<div class="lt-time-only" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div>`;
+      return`<div class="${rc}">${lockEl(r)}<div>${timeHtmlF}</div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
     }).join('');
     document.getElementById(labelId).textContent=`イベント開始まで`;
     if(dd>0){document.getElementById(hId).textContent=pad(dd);document.getElementById(mId).textContent=pad(dh);document.getElementById(sId).textContent=pad(dm);document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;}
