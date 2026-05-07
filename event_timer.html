@@ -308,6 +308,71 @@ let liveIsFullscreen=false;
 
 ::-webkit-scrollbar{width:4px;}
 
+/* ★ FULLSCREEN OVERLAY */
+#fs-overlay{
+  display:none;
+  position:fixed;
+  top:0;left:0;right:0;bottom:0;
+  z-index:99999;
+  background:#0a0e14;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+}
+#fs-overlay.open{display:flex;}
+#fs-overlay .cd-cur-label{
+  font-size:clamp(18px,3vw,32px);
+  color:#c0d8f0;
+  margin-bottom:16px;
+  letter-spacing:.06em;
+  font-weight:700;
+  text-align:center;
+}
+#fs-overlay .cd-big{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(100px,20vw,240px);
+  line-height:.95;
+  color:#ffffff;
+  text-shadow:0 0 40px rgba(56,200,255,.4);
+  text-align:center;
+}
+#fs-overlay .cd-big .colon{color:var(--accent);animation:blink 1s step-end infinite;}
+#fs-overlay .cd-sub{
+  font-size:clamp(14px,2vw,22px);
+  color:#8ab0cc;
+  margin-top:16px;
+  letter-spacing:.1em;
+  text-align:center;
+}
+#fs-overlay .cd-prog-track{
+  width:min(600px,80vw);
+  height:4px;
+  background:rgba(255,255,255,.1);
+  border-radius:99px;
+  margin-top:20px;
+  overflow:hidden;
+}
+#fs-overlay .cd-prog-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent2),var(--accent));
+  border-radius:99px;
+  transition:width .6s linear;
+}
+.fs-close-btn{
+  position:fixed;
+  top:16px;left:16px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.25);
+  color:#fff;
+  font-family:'Zen Kaku Gothic New',sans-serif;
+  font-size:13px;letter-spacing:.15em;
+  padding:8px 20px;border-radius:4px;
+  cursor:pointer;transition:all .15s;
+  z-index:100000;
+}
+.fs-close-btn:hover{background:rgba(255,255,255,.2);}
+
 /* ★ VIEWER FULLSCREEN COUNTDOWN */
 .cd-cur.fullscreen-cd{
   position:fixed;
@@ -602,6 +667,17 @@ let liveIsFullscreen=false;
       <div id="vcd-next-wrap"></div>
     </div>
   </div>
+</div>
+
+<!-- ★ FULLSCREEN OVERLAY -->
+<div id="fs-overlay">
+  <button class="fs-close-btn" onclick="closeFullscreenOverlay()">✕ 戻る</button>
+  <div class="cd-cur-label" id="fs-label">—</div>
+  <div class="cd-big">
+    <span id="fs-h">--</span><span class="colon">:</span><span id="fs-m">--</span><span class="colon">:</span><span id="fs-s">--</span>
+  </div>
+  <div class="cd-sub" id="fs-sub"></div>
+  <div class="cd-prog-track"><div class="cd-prog-fill" id="fs-prog" style="width:0%"></div></div>
 </div>
 
 <script>
@@ -935,7 +1011,10 @@ function startLive(ev){
   updateFbIndicators();
   showScreen('screen-live');stopLiveTick();
   liveRender();publishLiveState();
-  liveTick=setInterval(()=>{tickLiveClock();liveRender();},1000);
+  liveTick=setInterval(()=>{
+    tickLiveClock();liveRender();
+    if(liveIsFullscreen||viewerIsFullscreen)syncOverlay();
+  },1000);
   tickLiveClock();
 }
 function stopLiveTick(){if(liveTick){clearInterval(liveTick);liveTick=null;}}
@@ -1173,14 +1252,52 @@ function toggleLiveFullscreen(){
   liveIsFullscreen=!liveIsFullscreen;
   const btn=document.getElementById('live-fs-btn');
   if(btn){btn.textContent=liveIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',liveIsFullscreen);}
-  window.parent.postMessage({type:'fullscreen',active:liveIsFullscreen},'*');
+  if(liveIsFullscreen){
+    openFullscreenOverlay();
+  } else {
+    closeFullscreenOverlay();
+  }
 }
 
 function toggleViewerFullscreen(){
   viewerIsFullscreen=!viewerIsFullscreen;
   const btn=document.getElementById('fs-btn');
   if(btn){btn.textContent=viewerIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',viewerIsFullscreen);}
-  window.parent.postMessage({type:'fullscreen',active:viewerIsFullscreen},'*');
+  if(viewerIsFullscreen){
+    openFullscreenOverlay();
+  } else {
+    closeFullscreenOverlay();
+  }
+}
+
+/* ★ FULLSCREEN OVERLAY FUNCTIONS */
+function openFullscreenOverlay(){
+  document.getElementById('fs-overlay').classList.add('open');
+  syncOverlay();
+}
+function closeFullscreenOverlay(){
+  document.getElementById('fs-overlay').classList.remove('open');
+  liveIsFullscreen=false;
+  viewerIsFullscreen=false;
+  const lb=document.getElementById('live-fs-btn');
+  const vb=document.getElementById('fs-btn');
+  if(lb){lb.textContent='FULL';lb.classList.remove('active');}
+  if(vb){vb.textContent='FULL';vb.classList.remove('active');}
+}
+function syncOverlay(){
+  // Copy current countdown values to overlay
+  const label=document.getElementById('cd-label')||document.getElementById('vcd-label');
+  const h=document.getElementById('cd-h')||document.getElementById('vcd-h');
+  const m=document.getElementById('cd-m')||document.getElementById('vcd-m');
+  const s=document.getElementById('cd-s')||document.getElementById('vcd-s');
+  const sub=document.getElementById('cd-sub')||document.getElementById('vcd-sub');
+  const prog=document.getElementById('cd-prog')||document.getElementById('vcd-prog');
+  if(label)document.getElementById('fs-label').textContent=label.textContent;
+  if(h)document.getElementById('fs-h').textContent=h.textContent;
+  if(m)document.getElementById('fs-m').textContent=m.textContent;
+  if(s)document.getElementById('fs-s').textContent=s.textContent;
+  if(sub)document.getElementById('fs-sub').textContent=sub.textContent;
+  if(prog)document.getElementById('fs-prog').style.width=prog.style.width;
 }
 
 /* BOOT */
@@ -1234,6 +1351,9 @@ document.addEventListener('keydown', e=>{
     const viewerActive=document.getElementById('screen-viewer').classList.contains('active');
     if(liveActive) toggleLiveFullscreen();
     else if(viewerActive) toggleViewerFullscreen();
+  }
+  if(e.key==='Escape'){
+    closeFullscreenOverlay();
   }
 });
 // Listen for fullscreen cancel from parent (e.g. ESC key)
