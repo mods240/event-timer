@@ -16,6 +16,7 @@
   --warn:#ffbe3a;--green:#3affaa;
   --text:#ffffff;--muted:#7a96b0;
   --active-bg:rgba(56,200,255,0.1);
+  --magenta:#ff3aaa;
   --row-bg:rgba(255,255,255,0.04);
 }
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -241,11 +242,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .lt-time{font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:.04em;color:var(--muted);text-decoration:line-through;opacity:.6;}
 .live-tt-row.is-locked-row .lt-time{color:var(--muted);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
-.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--warn);opacity:1;font-weight:900;}
+.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:24px;color:var(--magenta);opacity:1;font-weight:900;}
 /* when no delay, show original time big */
-.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:var(--accent);}
-.live-tt-row.is-locked-row .lt-time-only{color:var(--warn);}
-.live-tt-row.is-done .lt-time-only{color:var(--muted);}
+.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:.04em;color:#ffffff;}
+.live-tt-row.is-locked-row .lt-time-only{color:var(--warn) !important;}
+.live-tt-row.is-done .lt-time-only{color:var(--muted) !important;}
 .lt-label{font-size:16px;letter-spacing:.02em;font-weight:700;}
 .live-tt-row.is-done .lt-label{color:var(--muted);}
 .lt-badge{font-size:11px;letter-spacing:.1em;padding:3px 8px;border-radius:3px;text-align:center;font-weight:700;}
@@ -1211,7 +1212,7 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
         const diff=Math.max(0,eff(r)*60-nowSecs);
         const dh=Math.floor(diff/3600),dm=Math.floor(diff%3600/60),ds=diff%60;
         const cdStr=dh>0?`${pad(dh)}:${pad(dm)}:${pad(ds)}`:`${pad(dm)}:${pad(ds)}`;
-        const adjD=delay!==0&&!r.locked?`<span style="color:var(--warn)">${effStr(r)}</span> <span style="text-decoration:line-through;opacity:.3;font-size:.85em">${minsToStr(r.baseTime)}</span>`:effStr(r);
+        const adjD=delay!==0&&!r.locked?`<span style="color:var(--magenta)">${effStr(r)}</span> <span style="text-decoration:line-through;opacity:.3;font-size:.85em">${minsToStr(r.baseTime)}</span>`:effStr(r);
         return`<div class="cd-ni${r.locked?' locked-ni':''}"><div style="flex:1;min-width:0"><div class="cd-ni-label">${esc(r.label||effStr(r))}${r.locked?' 🔒':''}</div><div class="cd-ni-start">${adjD} スタート</div></div><div class="cd-ni-cd">${cdStr}</div></div>`;
       }).join('');
   }else document.getElementById(nextId).innerHTML='';
