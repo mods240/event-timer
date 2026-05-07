@@ -747,12 +747,18 @@ function saveFbConfig_store(cfg){localStorage.setItem(FB_KEY,JSON.stringify(cfg)
 
 /* FIREBASE */
 let fbDb=null,fbConnected=false,currentSessionId=null;
+let serverTimeOffset=0; // ms offset between local and server time
 function initFirebase(cfg){
   try{
     if(firebase.apps.length){firebase.app().delete().catch(()=>{});}
     firebase.initializeApp(cfg);
     fbDb=firebase.database();
-    fbConnected=true;updateFbIndicators();return true;
+    fbConnected=true;updateFbIndicators();
+    // Sync server time offset
+    fbDb.ref('.info/serverTimeOffset').on('value',snap=>{
+      serverTimeOffset=snap.val()||0;
+    });
+    return true;
   }catch(e){fbConnected=false;updateFbIndicators();return false;}
 }
 function updateFbIndicators(){
@@ -1084,6 +1090,10 @@ function publishLiveState(){
   });
 }
 
+function getServerNow(){
+  // Returns current time adjusted by server offset for accurate sync
+  return new Date(Date.now()+serverTimeOffset);
+}
 function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
 function getEffStr(r){return minsToStr(getEff(r));}
 function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
@@ -1097,7 +1107,7 @@ function applyDelay(){
 function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
 
 function tickLiveClock(){
-  const n=new Date();
+  const n=getServerNow();
   document.getElementById('lh-h').textContent=pad(n.getHours());
   document.getElementById('lh-m').textContent=pad(n.getMinutes());
   document.getElementById('lh-s').textContent=pad(n.getSeconds());
@@ -1140,7 +1150,7 @@ function liveRender(){
 
 /* COUNTDOWN (isLive=true enables lock toggle click) */
 function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,progId,nextId,isLive){
-  const now=new Date();
+  const now=getServerNow();
   let dayDiff=0;
   if(eventDate){
     const todayStr=`${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
@@ -1279,7 +1289,7 @@ function startViewerMode(sessionId){
   });
   if(viewerTick)clearInterval(viewerTick);
   viewerTick=setInterval(()=>{
-    const n=new Date();
+    const n=getServerNow();
     document.getElementById('vlh').textContent=pad(n.getHours());
     document.getElementById('vlm').textContent=pad(n.getMinutes());
     document.getElementById('vls').textContent=pad(n.getSeconds());
