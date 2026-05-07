@@ -360,16 +360,14 @@ let liveIsFullscreen=false;
 }
 #fs-overlay .cd-big{
   font-family:'Bebas Neue',sans-serif;
-  font-size:min(95vw/6, 95vh/2);
+  font-size:40vw;
   line-height:.9;
   color:#ffffff;
   text-shadow:0 0 60px rgba(56,200,255,.5);
   text-align:center;
-  width:95vw;
+  width:100%;
   letter-spacing:-.01em;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+  transition:font-size .2s;
 }
 #fs-overlay .cd-big .colon{color:var(--accent);animation:blink 1s step-end infinite;}
 #fs-overlay .cd-sub{
@@ -406,6 +404,34 @@ let liveIsFullscreen=false;
   z-index:100000;
 }
 .fs-close-btn:hover{background:rgba(255,255,255,.2);}
+.fs-size-controls{
+  position:fixed;
+  bottom:20px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:12px;
+  z-index:100000;
+  background:rgba(0,0,0,.4);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:30px;
+  padding:8px 20px;
+}
+.fs-size-btn{
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  color:#fff;
+  font-size:20px;font-weight:700;
+  width:36px;height:36px;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s;
+  line-height:1;
+}
+.fs-size-btn:hover{background:rgba(255,255,255,.25);}
+.fs-size-label{
+  font-size:11px;letter-spacing:.15em;
+  color:rgba(255,255,255,.4);
+  min-width:50px;text-align:center;
+}
 
 /* ★ VIEWER FULLSCREEN COUNTDOWN */
 .cd-cur.fullscreen-cd{
@@ -717,11 +743,16 @@ let liveIsFullscreen=false;
 <div id="fs-overlay">
   <button class="fs-close-btn" onclick="closeFullscreenOverlay()">✕ 戻る</button>
   <div class="cd-cur-label" id="fs-label">—</div>
-  <div class="cd-big">
+  <div class="cd-big" id="fs-cd-big">
     <span id="fs-h">--</span><span class="colon">:</span><span id="fs-m">--</span><span class="colon">:</span><span id="fs-s">--</span>
   </div>
   <div class="cd-sub" id="fs-sub"></div>
   <div class="cd-prog-track"><div class="cd-prog-fill" id="fs-prog" style="width:0%"></div></div>
+  <div class="fs-size-controls">
+    <button class="fs-size-btn" onclick="changeFsSize(-5)">−</button>
+    <div class="fs-size-label" id="fs-size-label">40vw</div>
+    <button class="fs-size-btn" onclick="changeFsSize(+5)">＋</button>
+  </div>
 </div>
 
 <script>
@@ -1383,6 +1414,14 @@ function toggleViewerFullscreen(){
 }
 
 /* ★ FULLSCREEN OVERLAY FUNCTIONS */
+let fsSizeVw=40;
+function changeFsSize(delta){
+  fsSizeVw=Math.max(10,Math.min(90,fsSizeVw+delta));
+  const el=document.getElementById('fs-cd-big');
+  const lbl=document.getElementById('fs-size-label');
+  if(el)el.style.fontSize=fsSizeVw+'vw';
+  if(lbl)lbl.textContent=fsSizeVw+'vw';
+}
 function openFullscreenOverlay(){
   document.getElementById('fs-overlay').classList.add('open');
   syncOverlay();
