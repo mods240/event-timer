@@ -226,7 +226,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-row{display:grid;grid-template-columns:24px 18px 80px 1fr 50px;align-items:center;gap:6px;padding:10px 12px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
+.live-tt-row{display:grid;grid-template-columns:28px 100px 1fr 62px;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
 .live-tt-row.is-done{opacity:.28;}
@@ -242,9 +242,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .lt-time{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:line-through;opacity:.6;}
 .live-tt-row.is-locked-row .lt-time{color:var(--muted);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
-.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--magenta);opacity:1;font-weight:900;}
+.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--magenta);opacity:1;font-weight:900;}
 /* when no delay, show original time big */
-.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.02em;color:#ffffff;}
+.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.04em;color:#ffffff;}
 .live-tt-row.is-locked-row .lt-time-only{color:var(--warn) !important;}
 .live-tt-row.is-done .lt-time-only{color:var(--muted) !important;}
 .lt-label{font-size:16px;letter-spacing:.02em;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
@@ -256,33 +256,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-cd{padding:16px 15px;display:flex;flex-direction:column;gap:8px;overflow-y:auto;}
 .live-cd-title{font-size:13px;letter-spacing:.22em;color:var(--accent);font-weight:700;}
 
-/* ★ LIVE BULK SHIFT */
-.live-bulk-bar{
-  display:flex;align-items:center;gap:6px;
-  padding:7px 10px;
-  background:rgba(255,184,74,.05);
-  border:1px solid rgba(255,184,74,.2);
-  border-radius:4px;
-  flex-wrap:wrap;
-}
-.live-bulk-label{font-size:10px;letter-spacing:.15em;color:var(--warn);white-space:nowrap;}
-.live-bulk-input{
-  background:rgba(255,255,255,.06);border:1px solid var(--border);
-  border-radius:3px;color:var(--text);
-  font-family:'Zen Kaku Gothic New',sans-serif;font-size:14px;font-weight:700;
-  padding:4px 8px;outline:none;width:72px;text-align:center;
-}
-.live-bulk-input:focus{border-color:var(--warn);}
-.live-bulk-unit{font-size:10px;color:var(--muted);}
-.live-bulk-btn{
-  background:rgba(255,184,74,.12);border:1px solid rgba(255,184,74,.4);
-  color:var(--warn);font-family:'Zen Kaku Gothic New',sans-serif;
-  font-size:10px;letter-spacing:.15em;padding:5px 12px;border-radius:3px;
-  cursor:pointer;transition:all .15s;
-}
-.live-bulk-btn:hover{background:rgba(255,184,74,.22);}
-.live-sel-cb{cursor:pointer;accent-color:var(--warn);width:13px;height:13px;flex-shrink:0;}
-.live-sel-all{cursor:pointer;accent-color:var(--warn);width:13px;height:13px;}
+
 .delay-status{display:none;align-items:center;gap:6px;background:rgba(255,184,74,.07);border:1px solid rgba(255,184,74,.2);border-radius:3px;padding:7px 10px;}
 .delay-status.on{display:flex;}
 .delay-status-text{font-size:13px;letter-spacing:.06em;color:var(--warn);font-weight:700;}
@@ -680,13 +654,7 @@ let liveIsFullscreen=false;
   </div>
   <div class="live-main">
     <div class="live-tt">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
-        <div class="live-tt-title" style="margin-bottom:0;">TIMETABLE</div>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <span style="font-size:9px;letter-spacing:.12em;color:var(--muted);">全選択</span>
-          <input type="checkbox" class="live-sel-all" id="live-sel-all" onchange="toggleLiveSelAll(this.checked)" title="全て選択" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;">
-        </div>
-      </div>
+      <div class="live-tt-title">TIMETABLE</div>
       <div id="live-tt-list"></div>
     </div>
     <div class="live-cd">
@@ -1072,7 +1040,6 @@ function saveAndStartLive(){
 }
 
 let liveTick=null,liveRows=[];
-let liveCheckedIds=new Set(); // track checked row IDs across renders
 function startLive(ev){
   const event=ev||getEvent(currentEventId);if(!event)return;
   liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
@@ -1096,34 +1063,6 @@ function startLive(ev){
 function stopLiveTick(){if(liveTick){clearInterval(liveTick);liveTick=null;}}
 
 /* ★ LIVE LOCK TOGGLE */
-function toggleLiveSelAll(checked){
-  document.querySelectorAll('.live-sel-cb').forEach(cb=>{
-    if(!cb.closest('.live-tt-row')?.classList.contains('is-locked-row')) cb.checked=checked;
-  });
-}
-
-function applyLiveBulkShift(){
-  const mins=parseInt(document.getElementById('live-bulk-val').value)||0;
-  if(mins===0){alert('シフトする分数を入力してください');return;}
-  const checked=document.querySelectorAll('.live-sel-cb:checked');
-  if(!checked.length){alert('シフトする行にチェックを入れてください');return;}
-  checked.forEach(cb=>{
-    const id=parseInt(cb.dataset.id);
-    const r=liveRows.find(r=>r.id===id);
-    if(r&&!r.locked){
-      r.baseTime=Math.max(0,r.baseTime+mins);
-    }
-  });
-  // Save and publish
-  const ev=getEvent(currentEventId);
-  if(ev){ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));upsertEvent(ev);}
-  publishLiveState();
-  liveRender();
-  document.getElementById('live-bulk-val').value=0;
-  const selAll=document.getElementById('live-sel-all');
-  if(selAll)selAll.checked=false;
-}
-
 function toggleLiveLock(id){
   const r=liveRows.find(r=>r.id===id);if(!r)return;
   r.locked=!r.locked;
@@ -1149,31 +1088,10 @@ function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
 function getEffStr(r){return minsToStr(getEff(r));}
 function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
 function applyDelay(){
-  // If any checkboxes are checked, only shift those rows (not locked)
-  const checkedBoxes=document.querySelectorAll('.live-sel-cb:checked');
-  if(checkedBoxes.length>0){
-    // selective shift: directly modify baseTime of checked unlocked rows
-    const shiftMins=pendingDelay-appliedDelay; // delta from current applied
-    checkedBoxes.forEach(cb=>{
-      const id=parseInt(cb.dataset.id);
-      const r=liveRows.find(r=>r.id===id);
-      if(r&&!r.locked) r.baseTime=Math.max(0,r.baseTime+shiftMins);
-    });
-    // save back
-    const ev=getEvent(currentEventId);
-    if(ev){ev.rows=liveRows.map(r=>({baseTime:r.baseTime,label:r.label,locked:r.locked}));upsertEvent(ev);}
-    // reset delay counter since we applied directly to baseTime
-    appliedDelay=0;pendingDelay=0;
-    document.getElementById('delay-val').textContent='+0分';
-    document.getElementById('delay-status').classList.remove('on');
-    liveCheckedIds.clear();
-  } else {
-    // no selection: apply to all unlocked rows (original behavior)
-    appliedDelay=pendingDelay;
-    const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
-    if(appliedDelay===0)ds.classList.remove('on');
-    else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
-  }
+  appliedDelay=pendingDelay;
+  const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
+  if(appliedDelay===0)ds.classList.remove('on');
+  else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
   liveRender();publishLiveState();
 }
 function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
@@ -1216,21 +1134,8 @@ function startEditEvName(){
 }
 
 function liveRender(){
-  // Save checked state BEFORE re-render
-  const prevChecked=new Set();
-  document.querySelectorAll('.live-sel-cb').forEach(cb=>{
-    if(cb.checked) prevChecked.add(parseInt(cb.dataset.id));
-  });
-  // Merge with global tracker
-  prevChecked.forEach(id=>liveCheckedIds.add(id));
-
   const ev=getEvent(currentEventId)||{};
   renderCountdown(liveRows,appliedDelay,ev.date||'','live-tt-list','cd-label','cd-h','cd-m','cd-s','cd-sub','cd-prog','cd-next-wrap',true);
-
-  // Restore checked state AFTER re-render
-  document.querySelectorAll('.live-sel-cb').forEach(cb=>{
-    cb.checked=liveCheckedIds.has(parseInt(cb.dataset.id));
-  });
 }
 
 /* COUNTDOWN (isLive=true enables lock toggle click) */
@@ -1301,8 +1206,7 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const timeHtml=hasAdj
       ?`<div class="lt-time">${minsToStr(r.baseTime)}</div><div class="lt-adj">${minsToStr(eff(r))}</div>`
       :`<div class="lt-time-only">${minsToStr(r.baseTime)}</div>`;
-    const selCb=`<div style="display:flex;align-items:center;justify-content:center;"><input type="checkbox" class="live-sel-cb" data-id="${r.id}" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;" ${r.locked?'title="ロック中のため変更不可"':''}></div>`;
-    return`<div class="${rc}">${lockEl(r)}${selCb}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
+    return`<div class="${rc}">${lockEl(r)}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
   }).join('');
 
   if(!sorted.length){
