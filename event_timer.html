@@ -347,30 +347,32 @@ let liveIsFullscreen=false;
   flex-direction:column;
   align-items:center;
   justify-content:center;
-  padding:40px;
+  padding:16px 20px;
 }
 #fs-overlay.open{display:flex;}
 #fs-overlay .cd-cur-label{
-  font-size:clamp(18px,3vw,32px);
+  font-size:clamp(20px,4vw,48px);
   color:#c0d8f0;
-  margin-bottom:16px;
+  margin-bottom:12px;
   letter-spacing:.06em;
   font-weight:700;
   text-align:center;
 }
 #fs-overlay .cd-big{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(100px,20vw,240px);
-  line-height:.95;
+  font-size:clamp(120px,28vw,380px);
+  line-height:.9;
   color:#ffffff;
-  text-shadow:0 0 40px rgba(56,200,255,.4);
+  text-shadow:0 0 60px rgba(56,200,255,.5);
   text-align:center;
+  width:100%;
+  letter-spacing:-.01em;
 }
 #fs-overlay .cd-big .colon{color:var(--accent);animation:blink 1s step-end infinite;}
 #fs-overlay .cd-sub{
-  font-size:clamp(14px,2vw,22px);
+  font-size:clamp(16px,2.5vw,32px);
   color:#8ab0cc;
-  margin-top:16px;
+  margin-top:12px;
   letter-spacing:.1em;
   text-align:center;
 }
@@ -893,7 +895,7 @@ function renderHome(){
 function confirmDel(id){const ev=getEvent(id);if(!ev)return;if(confirm(`「${ev.name||'（無題）'}」を削除しますか？`)){deleteEvent(id);renderHome();}}
 function openEvent(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);startLive(ev);}
 function editFromHome(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
-function goHome(){pendingDelay=0;appliedDelay=0;stopLiveTick();fbUnsubAll();renderHome();}
+function goHome(){pendingDelay=0;appliedDelay=0;liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
 
 /* WIZARD */
 let currentEventId=null,pendingDelay=0,appliedDelay=0;
@@ -1180,16 +1182,18 @@ function startEditEvName(){
 }
 
 function liveRender(){
-  // Save checked state before re-render
-  document.querySelectorAll('.live-sel-cb:checked').forEach(cb=>{
-    liveCheckedIds.add(parseInt(cb.dataset.id));
+  // Save checked state BEFORE re-render
+  const prevChecked=new Set();
+  document.querySelectorAll('.live-sel-cb').forEach(cb=>{
+    if(cb.checked) prevChecked.add(parseInt(cb.dataset.id));
   });
-  document.querySelectorAll('.live-sel-cb:not(:checked)').forEach(cb=>{
-    liveCheckedIds.delete(parseInt(cb.dataset.id));
-  });
+  // Merge with global tracker
+  prevChecked.forEach(id=>liveCheckedIds.add(id));
+
   const ev=getEvent(currentEventId)||{};
   renderCountdown(liveRows,appliedDelay,ev.date||'','live-tt-list','cd-label','cd-h','cd-m','cd-s','cd-sub','cd-prog','cd-next-wrap',true);
-  // Restore checked state
+
+  // Restore checked state AFTER re-render
   document.querySelectorAll('.live-sel-cb').forEach(cb=>{
     cb.checked=liveCheckedIds.has(parseInt(cb.dataset.id));
   });
