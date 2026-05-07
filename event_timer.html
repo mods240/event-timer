@@ -226,7 +226,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-row{display:grid;grid-template-columns:18px 24px 76px 1fr 56px;align-items:center;gap:5px;padding:10px 10px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
+.live-tt-row{display:grid;grid-template-columns:26px 100px 1fr auto;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
 .live-tt-row.is-done{opacity:.28;}
@@ -239,15 +239,15 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-lock-btn:hover{opacity:.9;transform:scale(1.1);}
 .live-lock-btn.is-locked{opacity:1;color:var(--warn);}
 
-.lt-time{font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.02em;color:var(--muted);text-decoration:line-through;opacity:.6;}
+.lt-time{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:line-through;opacity:.6;}
 .live-tt-row.is-locked-row .lt-time{color:var(--muted);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
-.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--magenta);opacity:1;font-weight:900;}
+.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--magenta);opacity:1;font-weight:900;}
 /* when no delay, show original time big */
-.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:.02em;color:#ffffff;}
+.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.04em;color:#ffffff;}
 .live-tt-row.is-locked-row .lt-time-only{color:var(--warn) !important;}
 .live-tt-row.is-done .lt-time-only{color:var(--muted) !important;}
-.lt-label{font-size:14px;letter-spacing:.01em;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.lt-label{font-size:16px;letter-spacing:.02em;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .live-tt-row.is-done .lt-label{color:var(--muted);}
 .lt-badge{font-size:11px;letter-spacing:.1em;padding:3px 8px;border-radius:3px;text-align:center;font-weight:700;}
 .lt-badge.active{background:rgba(74,184,255,.15);color:var(--accent);}
@@ -683,8 +683,8 @@ let liveIsFullscreen=false;
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
         <div class="live-tt-title" style="margin-bottom:0;">TIMETABLE</div>
         <div style="display:flex;align-items:center;gap:6px;">
-          <input type="checkbox" class="live-sel-all" id="live-sel-all" onchange="toggleLiveSelAll(this.checked)" title="全て選択">
-          <span style="font-size:9px;letter-spacing:.12em;color:var(--muted);">全選択（遅延反映対象）</span>
+          <span style="font-size:9px;letter-spacing:.12em;color:var(--muted);">全選択</span>
+          <input type="checkbox" class="live-sel-all" id="live-sel-all" onchange="toggleLiveSelAll(this.checked)" title="全て選択" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;">
         </div>
       </div>
       <div id="live-tt-list"></div>
@@ -1301,8 +1301,9 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const timeHtml=hasAdj
       ?`<div class="lt-time">${minsToStr(r.baseTime)}</div><div class="lt-adj">${minsToStr(eff(r))}</div>`
       :`<div class="lt-time-only">${minsToStr(r.baseTime)}</div>`;
-    const selCb=`<input type="checkbox" class="live-sel-cb" data-id="${r.id}" ${r.locked?'title="ロック中のため変更不可"':''}>`;
-    return`<div class="${rc}">${selCb}${lockEl(r)}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
+    const selCb=`<input type="checkbox" class="live-sel-cb" data-id="${r.id}" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;flex-shrink:0;" ${r.locked?'title="ロック中のため変更不可"':''}>`;
+    const rightCol=`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">${badge}${selCb}</div>`;
+    return`<div class="${rc}">${lockEl(r)}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${rightCol}</div>`;
   }).join('');
 
   if(!sorted.length){
