@@ -226,7 +226,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-row{display:grid;grid-template-columns:26px 100px 1fr auto;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
+.live-tt-row{display:grid;grid-template-columns:26px 22px 90px 1fr 56px;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
 .live-tt-row.is-done{opacity:.28;}
@@ -1301,9 +1301,8 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
     const timeHtml=hasAdj
       ?`<div class="lt-time">${minsToStr(r.baseTime)}</div><div class="lt-adj">${minsToStr(eff(r))}</div>`
       :`<div class="lt-time-only">${minsToStr(r.baseTime)}</div>`;
-    const selCb=`<input type="checkbox" class="live-sel-cb" data-id="${r.id}" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;flex-shrink:0;" ${r.locked?'title="ロック中のため変更不可"':''}>`;
-    const rightCol=`<div style="display:flex;align-items:center;gap:6px;justify-content:flex-end;">${badge}${selCb}</div>`;
-    return`<div class="${rc}">${lockEl(r)}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${rightCol}</div>`;
+    const selCb=`<div style="display:flex;align-items:center;justify-content:center;"><input type="checkbox" class="live-sel-cb" data-id="${r.id}" style="cursor:pointer;accent-color:var(--warn);width:14px;height:14px;" ${r.locked?'title="ロック中のため変更不可"':''}></div>`;
+    return`<div class="${rc}">${lockEl(r)}${selCb}<div>${timeHtml}</div><div class="lt-label">${esc(r.label||'—')}</div>${badge}</div>`;
   }).join('');
 
   if(!sorted.length){
