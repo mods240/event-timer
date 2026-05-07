@@ -226,7 +226,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-row{display:grid;grid-template-columns:26px 22px 90px 1fr 56px;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
+.live-tt-row{display:grid;grid-template-columns:24px 18px 80px 1fr 50px;align-items:center;gap:6px;padding:10px 12px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
 .live-tt-row.is-done{opacity:.28;}
@@ -242,9 +242,9 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .lt-time{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:.02em;color:var(--muted);text-decoration:line-through;opacity:.6;}
 .live-tt-row.is-locked-row .lt-time{color:var(--muted);}
 .live-tt-row.is-done .lt-time{color:var(--muted);}
-.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:26px;color:var(--magenta);opacity:1;font-weight:900;}
+.lt-adj{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--magenta);opacity:1;font-weight:900;}
 /* when no delay, show original time big */
-.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:.04em;color:#ffffff;}
+.lt-time-only{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:.02em;color:#ffffff;}
 .live-tt-row.is-locked-row .lt-time-only{color:var(--warn) !important;}
 .live-tt-row.is-done .lt-time-only{color:var(--muted) !important;}
 .lt-label{font-size:16px;letter-spacing:.02em;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
