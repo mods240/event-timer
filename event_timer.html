@@ -277,12 +277,11 @@ let viewerIsFullscreen=false;
 let liveIsFullscreen=false;
 
 function toggleLiveFullscreen(){
-  const el=document.getElementById('live-cd-cur');
-  const btn=document.getElementById('live-fs-btn');
   liveIsFullscreen=!liveIsFullscreen;
-  if(liveIsFullscreen){
-    el.classList.add('fullscreen-cd');
-    if(btn){btn.textContent='✕ 戻る';btn.style.cssText='position:absolute;top:16px;left:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:.15em;padding:8px 18px;border-radius:4px;cursor:pointer;z-index:10000;';}
+  const btn=document.getElementById('live-fs-btn');
+  if(btn){btn.textContent=liveIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',liveIsFullscreen);}
+  window.parent.postMessage({type:'fullscreen',active:liveIsFullscreen},'*');
+}
     document.body.style.overflow='hidden';
   }else{
     el.classList.remove('fullscreen-cd');
@@ -291,12 +290,11 @@ function toggleLiveFullscreen(){
   }
 }
 function toggleViewerFullscreen(){
-  const el=document.getElementById('vcd-cur');
-  const btn=document.getElementById('fs-btn');
   viewerIsFullscreen=!viewerIsFullscreen;
-  if(viewerIsFullscreen){
-    el.classList.add('fullscreen-cd');
-    if(btn){btn.textContent='✕ 戻る';btn.style.cssText='position:absolute;top:16px;left:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.3);color:#fff;font-family:'Zen Kaku Gothic New',sans-serif;font-size:13px;letter-spacing:.15em;padding:8px 18px;border-radius:4px;cursor:pointer;z-index:10000;';}
+  const btn=document.getElementById('fs-btn');
+  if(btn){btn.textContent=viewerIsFullscreen?'✕ 戻る':'FULL';btn.classList.toggle('active',viewerIsFullscreen);}
+  window.parent.postMessage({type:'fullscreen',active:viewerIsFullscreen},'*');
+}
     document.body.style.overflow='hidden';
   }else{
     el.classList.remove('fullscreen-cd');
