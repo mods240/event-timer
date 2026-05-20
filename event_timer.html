@@ -888,7 +888,12 @@ function applyTplRows(tpl){
 
 /* EXCEL IMPORT/EXPORT */
 function downloadExcelTemplate(){
+  const today=new Date();
+  const dateStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
   const data=[
+    ['イベント名:','例：第10回 周年式典'],
+    ['開催日:',dateStr],
+    [''],
     ['時刻','パート名','ロック（✓で固定）'],
     ['14:00','オープニング','✓'],
     ['14:10','キーノートスピーチ','✓'],
@@ -898,25 +903,30 @@ function downloadExcelTemplate(){
     ['15:30','クロージング','✓']
   ];
   const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:12},{wch:30},{wch:18}];
+  ws['!cols']=[{wch:14},{wch:30},{wch:18}];
   const wb=XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb,ws,'スケジュール');
   const guide=[
     ['EVENT TIMER Excelテンプレート 使い方'],
     [''],
-    ['【列の説明】'],
-    ['時刻：イベント開始時刻（HH:MM 形式、例：14:00）'],
-    ['パート名：そのパートの名前'],
-    ['ロック：✓をつけるとそのパートは固定時間になります'],
+    ['【上部（イベント情報）】'],
+    ['1行目 B列：イベント名を入力'],
+    ['2行目 B列：開催日を入力（YYYY-MM-DD 形式 例：2026-05-20）'],
+    [''],
+    ['【スケジュール表（4行目以降）】'],
+    ['A列（時刻）：イベント開始時刻（HH:MM 形式、例：14:00）'],
+    ['B列（パート名）：そのパートの名前'],
+    ['C列（ロック）：✓をつけるとそのパートは固定時間'],
     [''],
     ['【使い方】'],
-    ['1. このExcelを編集してスケジュールを入力'],
-    ['2. EVENT TIMERの「Excelから読込」ボタンをクリック'],
+    ['1. このExcelを編集してイベント情報とスケジュールを入力'],
+    ['2. EVENT TIMERの「エクセルから読み込み」ボタンをクリック'],
     ['3. このファイルを選択して読み込み'],
     ['4. 自動でウィザードに反映されます'],
     [''],
     ['【注意】'],
     ['・時刻は必ず HH:MM 形式で（例：14:00）'],
+    ['・開催日は YYYY-MM-DD 形式で（例：2026-05-20）'],
     ['・パート名は30文字以内推奨'],
     ['・ロック列に ✓ または「ロック」と書くと固定パートになります']
   ];
@@ -933,11 +943,41 @@ function importExcel(event){
   reader.onload=function(e){
     try{
       const data=new Uint8Array(e.target.result);
-      const wb=XLSX.read(data,{type:'array'});
+      const wb=XLSX.read(data,{type:'array',cellDates:true});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:''});
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
+      let evName='';
+      let evDate='';
+      let scheduleStart=0;
+      // 上部からイベント名・日付を探す
+      for(let i=0;i<Math.min(rows.length,5);i++){
+        const r=rows[i];
+        if(!r||!r[0])continue;
+        const key=String(r[0]).trim();
+        const val=String(r[1]||'').trim();
+        if(key.includes('イベント名')&&val&&!val.startsWith('例：')){evName=val;}
+        if((key.includes('開催日')||key.includes('日程')||key.includes('日付'))&&val){
+          // 日付形式を正規化
+          let d=val;
+          if(/^\d{4}\/\d{1,2}\/\d{1,2}/.test(d)){
+            const[y,m,da]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
+          }else if(/^\d{4}-\d{1,2}-\d{1,2}/.test(d)){
+            const[y,m,da]=d.split('-');d=`${y}-${pad(m)}-${pad(da)}`;
+          }
+          evDate=d;
+        }
+      }
+      // ヘッダー行を探す（時刻 列のある行）
+      let headerRow=-1;
+      for(let i=0;i<rows.length;i++){
+        const r=rows[i];
+        if(!r)continue;
+        const c0=String(r[0]||'').trim();
+        if(c0==='時刻'||c0==='time'||c0==='Time'){headerRow=i;break;}
+      }
+      scheduleStart=headerRow>=0?headerRow+1:1;
       const parsed=[];
-      for(let i=1;i<rows.length;i++){
+      for(let i=scheduleStart;i<rows.length;i++){
         const r=rows[i];
         if(!r||!r[0])continue;
         let timeStr=String(r[0]).trim();
@@ -946,15 +986,19 @@ function importExcel(event){
           const totalMins=Math.round(parseFloat(timeStr)*24*60);
           timeStr=`${pad(Math.floor(totalMins/60))}:${pad(totalMins%60)}`;
         }
+        // "14:00:00" → "14:00"
+        if(/^\d{1,2}:\d{2}:\d{2}/.test(timeStr)){
+          timeStr=timeStr.substring(0,5);
+        }
         const m=toMins(timeStr);
         if(m===null)continue;
         const label=String(r[1]||'').trim();
         const lockStr=String(r[2]||'').trim();
-        const locked=lockStr==='✓'||lockStr==='✓'||lockStr.toLowerCase()==='true'||lockStr==='ロック'||lockStr==='固定';
+        const locked=lockStr==='✓'||lockStr.toLowerCase()==='true'||lockStr==='ロック'||lockStr==='固定'||lockStr==='○';
         parsed.push({baseTime:m,label,locked});
       }
       if(!parsed.length){
-        alert('読み込めるデータがありませんでした。\n時刻は HH:MM 形式で入力してください。');
+        alert('読み込めるスケジュールがありませんでした。\n時刻は HH:MM 形式で入力してください。');
         event.target.value='';
         return;
       }
@@ -962,6 +1006,14 @@ function importExcel(event){
       startWizard();
       wzNid=1;
       wzRows=parsed.map(p=>({id:wzNid++,baseTime:p.baseTime,label:p.label,locked:p.locked}));
+      if(evName){
+        document.getElementById('wz-evname').value=evName;
+        const en2=document.getElementById('wz-evname2');if(en2)en2.value=evName;
+      }
+      if(evDate){
+        document.getElementById('wz-evdate').value=evDate;
+        const ed2=document.getElementById('wz-evdate2');if(ed2)ed2.value=evDate;
+      }
       renderWzTable();
       setWzStep(2);
       event.target.value='';
