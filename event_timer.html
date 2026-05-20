@@ -531,12 +531,18 @@ let liveIsFullscreen=false;
     <div class="home-logo">EVENT TIMER</div>
     <div class="home-sub">イベント進行管理ツール</div>
     <div class="fb-indicator"><div class="fb-dot" id="home-fb-dot"></div><span id="home-fb-label">Firebase未接続</span></div>
-    <div class="home-actions">
-      <button class="home-btn home-btn-primary" onclick="startWizard()">＋ 新しいイベントを作成</button>
-      <button class="home-btn home-btn-secondary" onclick="openTplLoadFromHome()">📋 テンプレートから作成</button>
-      <button class="home-btn home-btn-secondary" onclick="document.getElementById('excel-input').click()">📊 Excelから読込</button>
-      <button class="home-btn home-btn-ghost" onclick="downloadExcelTemplate()">⬇ テンプレートDL</button>
-      <button class="home-btn home-btn-ghost" onclick="showScreen('screen-fbsetup')">⚙ Firebase設定</button>
+    <div class="home-actions" style="flex-direction:column;align-items:center;gap:8px">
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="home-btn home-btn-primary" onclick="startWizard()">＋ 新しいイベントを作成</button>
+        <button class="home-btn home-btn-secondary" onclick="openTplLoadFromHome()">📋 既存テンプレートを流用して作成</button>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="home-btn home-btn-ghost" onclick="downloadExcelTemplate()">⬇ エクセルテンプレートDL</button>
+        <button class="home-btn home-btn-secondary" onclick="document.getElementById('excel-input').click()">📊 エクセルから読み込み</button>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="home-btn home-btn-ghost" onclick="showScreen('screen-fbsetup')">⚙ Firebase設定</button>
+      </div>
       <input type="file" id="excel-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(event)">
     </div>
     <div class="saved-title">保存済みイベント</div>
