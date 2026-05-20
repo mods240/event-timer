@@ -1300,7 +1300,9 @@ function tickLiveClock(){
   document.getElementById('lh-h').textContent=pad(n.getHours());
   document.getElementById('lh-m').textContent=pad(n.getMinutes());
   document.getElementById('lh-s').textContent=pad(n.getSeconds());
-  document.getElementById('lh-date').textContent=`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${DJ[n.getDay()]})`;
+  document.getElementById('lh-date').textContent=getLang()==='en'
+    ?`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][n.getDay()]})`
+    :`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${DJ[n.getDay()]})`;
 }
 
 function startEditEvName(){
