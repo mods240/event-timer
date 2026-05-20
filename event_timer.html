@@ -959,9 +959,15 @@ function importExcel(event){
         if((key.includes('開催日')||key.includes('日程')||key.includes('日付'))&&val){
           // 日付形式を正規化
           let d=val;
+          // "2026-05-22 00:00:00" → "2026-05-22"
+          if(/^\d{4}-\d{1,2}-\d{1,2}[\sT]/.test(d)){
+            d=d.split(/[\sT]/)[0];
+          }
+          // "2026/5/20 0:00:00" → "2026-05-20"
           if(/^\d{4}\/\d{1,2}\/\d{1,2}/.test(d)){
+            d=d.split(/[\sT]/)[0];
             const[y,m,da]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
-          }else if(/^\d{4}-\d{1,2}-\d{1,2}/.test(d)){
+          }else if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)){
             const[y,m,da]=d.split('-');d=`${y}-${pad(m)}-${pad(da)}`;
           }
           evDate=d;
