@@ -78,11 +78,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .home-inner{text-align:center;animation:fadeUp .6s ease both;}
 .home-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);letter-spacing:.2em;color:var(--accent);margin-bottom:8px;}
 
-/* Language Switcher */
-.lang-switch{position:fixed;top:14px;right:18px;display:flex;gap:2px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:4px;padding:2px;z-index:300;}
-.lang-btn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.14em;padding:5px 11px;border-radius:3px;cursor:pointer;transition:all .15s;}
+/* Language Switcher - 左上に配置（右上のHomeボタンと干渉しないため） */
+.lang-switch{position:fixed;bottom:50px;right:10px;display:flex;gap:2px;background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:4px;padding:2px;z-index:500;backdrop-filter:blur(4px);}
+.lang-btn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.14em;padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .15s;}
 .lang-btn:hover{color:var(--text);}
 .lang-btn.active{background:rgba(74,184,255,.18);color:var(--accent);}
+@media(max-width:768px){.lang-switch{bottom:46px;right:6px;}.lang-btn{font-size:10px;padding:3px 8px;}}
 .home-sub{font-size:16px;letter-spacing:.25em;color:#8ab0cc;margin-bottom:10px;}
 .fb-indicator{display:inline-flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.14em;color:#8ab0cc;margin-bottom:36px;}
 .fb-dot{width:11px;height:11px;border-radius:50%;background:var(--muted);}
@@ -1059,7 +1060,16 @@ function importExcel(event){
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function formatDate(dateStr){
   if(!dateStr)return'';
-  try{const d=new Date(dateStr+'T00:00:00');const dj=['日','月','火','水','木','金','土'];return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;}
+  try{
+    const d=new Date(dateStr+'T00:00:00');
+    if(typeof getLang==='function'&&getLang()==='en'){
+      const de=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+      const me=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+      return`${me[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} (${de[d.getDay()]})`;
+    }
+    const dj=['日','月','火','水','木','金','土'];
+    return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;
+  }
   catch{return dateStr;}
 }
 function renderHome(){
@@ -1230,7 +1240,7 @@ function startLive(ev){
   liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
   currentSessionId=event.id;
   pendingDelay=0;appliedDelay=0;
-  document.getElementById('delay-val').textContent='+0分';
+  document.getElementById('delay-val').textContent=getLang()==='en'?'+0min':'+0分';
   document.getElementById('delay-status').classList.remove('on');
   document.getElementById('lh-evname').textContent=event.name?`/ ${event.name}`:'';
   const dateBadge=document.getElementById('lh-evdate');
@@ -1275,7 +1285,7 @@ function getServerNow(){
 }
 function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
 function getEffStr(r){return minsToStr(getEff(r));}
-function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
+function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+(getLang()==='en'?'min':'分');}
 function applyDelay(){
   appliedDelay=pendingDelay;
   const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
@@ -1283,7 +1293,7 @@ function applyDelay(){
   else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
   liveRender();publishLiveState();
 }
-function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
+function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent=getLang()==='en'?'+0min':'+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
 
 function tickLiveClock(){
   const n=getServerNow();
@@ -1365,15 +1375,31 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
         :`<div class="lt-time-only" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div>`;
       return`<div class="${rc}">${lockEl(r)}<div>${timeHtmlF}</div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
     }).join('');
-    document.getElementById(labelId).textContent=`イベント開始まで`;
-    if(dd>0){document.getElementById(hId).textContent=pad(dd);document.getElementById(mId).textContent=pad(dh);document.getElementById(sId).textContent=pad(dm);document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;}
-    else{document.getElementById(hId).textContent=pad(dh);document.getElementById(mId).textContent=pad(dm);document.getElementById(sId).textContent=pad(ds);document.getElementById(subId).textContent=`${formatDate(eventDate)} スタート`;}
+    document.getElementById(labelId).textContent=tr(`イベント開始まで`);
+    if(dd>0){
+      document.getElementById(hId).textContent=pad(dd);
+      document.getElementById(mId).textContent=pad(dh);
+      document.getElementById(sId).textContent=pad(dm);
+      const subTxt=getLang()==='en'
+        ?`${dd}d ${dh}h ${dm}m left — ${formatDate(eventDate)}`
+        :`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;
+      document.getElementById(subId).textContent=subTxt;
+    }
+    else{
+      document.getElementById(hId).textContent=pad(dh);
+      document.getElementById(mId).textContent=pad(dm);
+      document.getElementById(sId).textContent=pad(ds);
+      const subTxt=getLang()==='en'
+        ?`${formatDate(eventDate)} Start`
+        :`${formatDate(eventDate)} スタート`;
+      document.getElementById(subId).textContent=subTxt;
+    }
     document.getElementById(progId).style.width='0%';document.getElementById(nextId).innerHTML='';return;
   }
 
   if(dayDiff<0){
     document.getElementById(ttId).innerHTML=rows.map(r=>`<div class="live-tt-row is-done"><div></div><div><div class="lt-time-only" style="color:var(--muted)">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`).join('');
-    document.getElementById(labelId).textContent='イベントは終了しました';
+    document.getElementById(labelId).textContent=tr('イベントは終了しました');
     [hId,mId,sId].forEach(id=>document.getElementById(id).textContent='--');
     document.getElementById(subId).textContent=formatDate(eventDate);
     document.getElementById(progId).style.width='100%';document.getElementById(nextId).innerHTML='';return;
@@ -1431,7 +1457,9 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
       document.getElementById(hId).textContent=pad(Math.floor(el/3600));
       document.getElementById(mId).textContent=pad(Math.floor(el%3600/60));
       document.getElementById(sId).textContent=pad(Math.max(0,el%60));
-      document.getElementById(subId).textContent=`${effStr(cur)} スタート（経過時間）`;
+      document.getElementById(subId).textContent=getLang()==='en'
+        ?`${effStr(cur)} Started (elapsed)`
+        :`${effStr(cur)} スタート（経過時間）`;
       document.getElementById(progId).style.width='100%';
     }
   }
@@ -1672,6 +1700,8 @@ const i18nDict={
   'NOW':'NOW',
   '以降のスケジュール':'Upcoming Schedule',
   'スタート（経過時間）':'Started (elapsed)',
+  'イベント開始まで':'Time until event starts',
+  'イベントは終了しました':'Event has ended',
   '進行中':'Live',
   '終了':'Done',
   '待機':'Wait',
@@ -1680,9 +1710,12 @@ const i18nDict={
   'リセット':'Reset',
   '反映':'Apply',
   '共有':'Share',
+  '📡 共有':'📡 Share',
   '編集':'Edit',
   '⌂ ホーム':'⌂ Home',
   '✎ 編集':'✎ Edit',
+  '+0分':'+0min',
+  'FULL':'FULL',
   // モーダル
   'スタッフへ共有':'Share with Staff',
   'スタッフはClaudeアカウント不要で閲覧できます。':'Staff can view without an account.',
@@ -1725,17 +1758,34 @@ function applyI18n(){
   const nodes=[];
   let n;while(n=walker.nextNode())nodes.push(n);
   nodes.forEach(node=>{
-    const orig=node.dataset_orig||node.textContent;
+    const currentText=node.textContent;
+    const trimmed=currentText.trim();
+    if(!trimmed)return;
+    // 初回保存：日本語ベースをキーとして使う
     if(!node._origText){
-      // 初回：オリジナル保存
-      node._origText=node.textContent;
+      node._origText=currentText;
     }
-    const txt=node._origText.trim();
-    if(!txt)return;
-    if(lang==='en'&&i18nDict[txt]){
-      node.textContent=node._origText.replace(txt,i18nDict[txt]);
+    const origTrimmed=node._origText.trim();
+    
+    if(lang==='en'){
+      // 完全一致の英訳がある場合
+      if(i18nDict[origTrimmed]){
+        const newText=node._origText.replace(origTrimmed,i18nDict[origTrimmed]);
+        if(node.textContent!==newText)node.textContent=newText;
+      }
+      // 現在テキストが日本語版で、その英訳がある場合（動的に変わったテキスト用）
+      else if(i18nDict[trimmed]){
+        const newText=currentText.replace(trimmed,i18nDict[trimmed]);
+        if(node.textContent!==newText){
+          node._origText=currentText;
+          node.textContent=newText;
+        }
+      }
     }else if(lang==='ja'){
-      node.textContent=node._origText;
+      // 日本語に戻す
+      if(i18nDict[origTrimmed]&&currentText.includes(i18nDict[origTrimmed])){
+        node.textContent=node._origText;
+      }
     }
   });
   // placeholder属性も翻訳
@@ -1758,12 +1808,24 @@ window.addEventListener('DOMContentLoaded',()=>{
   setTimeout(applyI18n,100);
 });
 
-// 画面切替・DOM変更後のため、定期的に再適用（軽量）
-let _lastLang='';
+// liveRender後に翻訳を再適用するためのフック
+// 軽量な定期チェックで動的テキストを翻訳
 setInterval(()=>{
   const lang=getLang();
-  if(lang==='en')applyI18n();
-},800);
+  if(lang==='ja')return;
+  // 動的に生成されたテキストノードを走査して英訳適用
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);
+  const nodes=[];
+  let n;while(n=walker.nextNode())nodes.push(n);
+  nodes.forEach(node=>{
+    const txt=node.textContent.trim();
+    if(!txt)return;
+    if(i18nDict[txt]){
+      const newText=node.textContent.replace(txt,i18nDict[txt]);
+      if(node.textContent!==newText)node.textContent=newText;
+    }
+  });
+},500);
 </script>
 </body>
 </html>
