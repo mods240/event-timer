@@ -959,15 +959,27 @@ function importExcel(event){
         if((key.includes('開催日')||key.includes('日程')||key.includes('日付'))&&val){
           // 日付形式を正規化
           let d=val;
-          // "2026-05-22 00:00:00" → "2026-05-22"
+          // "2026-05-22 00:00:00" / "2026-05-22T00:00:00" → "2026-05-22"
           if(/^\d{4}-\d{1,2}-\d{1,2}[\sT]/.test(d)){
             d=d.split(/[\sT]/)[0];
           }
-          // "2026/5/20 0:00:00" → "2026-05-20"
-          if(/^\d{4}\/\d{1,2}\/\d{1,2}/.test(d)){
+          // "5/22/26" (米国形式 M/D/YY) → "2026-05-22"
+          if(/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(d)){
+            const[m,da,y]=d.split('/');
+            const fullY=parseInt(y)<70?'20'+pad(y):'19'+pad(y);
+            d=`${fullY}-${pad(m)}-${pad(da)}`;
+          }
+          // "5/22/2026" (M/D/YYYY) → "2026-05-22"
+          else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)){
+            const[m,da,y]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
+          }
+          // "2026/5/22" (YYYY/M/D) → "2026-05-22"
+          else if(/^\d{4}\/\d{1,2}\/\d{1,2}/.test(d)){
             d=d.split(/[\sT]/)[0];
             const[y,m,da]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
-          }else if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)){
+          }
+          // "2026-5-22" or "2026-05-22" → "2026-05-22"
+          else if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)){
             const[y,m,da]=d.split('-');d=`${y}-${pad(m)}-${pad(da)}`;
           }
           evDate=d;
@@ -1058,7 +1070,7 @@ function renderHome(){
 function confirmDel(id){const ev=getEvent(id);if(!ev)return;if(confirm(`「${ev.name||'（無題）'}」を削除しますか？`)){deleteEvent(id);renderHome();}}
 function openEvent(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);startLive(ev);}
 function editFromHome(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
-function goHome(){pendingDelay=0;appliedDelay=0;liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
+function goHome(){pendingDelay=0;appliedDelay=0;if(typeof liveCheckedIds!=='undefined'&&liveCheckedIds.clear)liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
 
 /* WIZARD */
 let currentEventId=null,pendingDelay=0,appliedDelay=0;
