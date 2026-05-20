@@ -77,6 +77,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #screen-home{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,rgba(74,184,255,.07) 0%,transparent 65%);}
 .home-inner{text-align:center;animation:fadeUp .6s ease both;}
 .home-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);letter-spacing:.2em;color:var(--accent);margin-bottom:8px;}
+
+/* Language Switcher */
+.lang-switch{position:fixed;top:14px;right:18px;display:flex;gap:2px;background:rgba(0,0,0,.4);border:1px solid var(--border);border-radius:4px;padding:2px;z-index:300;}
+.lang-btn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:12px;letter-spacing:.14em;padding:5px 11px;border-radius:3px;cursor:pointer;transition:all .15s;}
+.lang-btn:hover{color:var(--text);}
+.lang-btn.active{background:rgba(74,184,255,.18);color:var(--accent);}
 .home-sub{font-size:16px;letter-spacing:.25em;color:#8ab0cc;margin-bottom:10px;}
 .fb-indicator{display:inline-flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.14em;color:#8ab0cc;margin-bottom:36px;}
 .fb-dot{width:11px;height:11px;border-radius:50%;background:var(--muted);}
@@ -477,6 +483,12 @@ let liveIsFullscreen=false;
 </style>
 </head>
 <body>
+
+<!-- Language Switcher -->
+<div class="lang-switch">
+  <button class="lang-btn active" id="lang-ja" onclick="setLang('ja')">JA</button>
+  <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
+</div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-tpl-load"><div class="modal"><div class="modal-title">テンプレートから読み込み</div><div class="tpl-list" id="tpl-load-list"></div><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-load')">キャンセル</button></div></div></div>
@@ -1598,6 +1610,160 @@ window.addEventListener('message', e=>{
     if(vb){vb.textContent='FULL';vb.classList.remove('active');}
   }
 });
+
+/* ========== i18n SYSTEM ========== */
+const i18nDict={
+  // ホーム画面
+  'イベント進行管理ツール':'Real-time Event Timer',
+  'Firebase未接続':'Firebase Disconnected',
+  'Firebase接続中':'Firebase Connected',
+  '＋ 新しいイベントを作成':'+ Create New Event',
+  '📋 既存テンプレートを流用して作成':'📋 Use Existing Template',
+  '⬇ エクセルテンプレートDL':'⬇ Download Excel Template',
+  '📊 エクセルから読み込み':'📊 Import from Excel',
+  '⚙ Firebase設定':'⚙ Firebase Settings',
+  '保存済みイベント':'Saved Events',
+  '保存済みのイベントはありません':'No saved events',
+  // Firebase設定画面
+  'FIREBASE 接続設定':'FIREBASE CONNECTION SETUP',
+  'リアルタイム共有を有効にするための初期設定':'Initial setup for real-time sharing',
+  '接続テスト':'Test Connection',
+  '保存して開始':'Save & Start',
+  'Firebase なしで使う →':'Use without Firebase →',
+  // ウィザード共通
+  'イベント作成':'Create Event',
+  '← ホームへ':'← Home',
+  'STEP 1 — イベント名':'STEP 1 — Event Name',
+  'STEP 2 — タイムテーブルを作成':'STEP 2 — Build Timetable',
+  'STEP 3 — 確認':'STEP 3 — Confirm',
+  'イベント名':'Event Name',
+  'イベントの名前を入力してください':'Please enter an event name',
+  '開催日（任意）':'Date (optional)',
+  '次へ →':'Next →',
+  '← 戻る':'← Back',
+  // タイムテーブル
+  'タイムテーブル':'Timetable',
+  'テンプレート読込':'Load Template',
+  'テンプレート保存':'Save Template',
+  '固定':'Lock',
+  '開始時刻':'Start Time',
+  'パート名':'Part Name',
+  '末尾にパートを追加':'+ Add Part to End',
+  '選択行を一括シフト':'Bulk Shift Selected',
+  '分':'min',
+  '適用':'Apply',
+  'チェックした行の時刻をまとめてずらします（例：−60 で1時間前倒し）':'Shift checked rows together (e.g. −60 to advance by 1 hour)',
+  'ドラッグで並び替え':'Drag to reorder',
+  '上下移動':'Move up/down',
+  '直下に挿入':'Insert below',
+  '時刻固定':'Lock time',
+  '選択→一括シフト':'Select → Bulk shift',
+  'パートを追加したら「次へ」へ':'Add parts and click Next',
+  // 確認画面
+  '内容を確認して開始':'Review & Start',
+  'イベント名:':'Event Name:',
+  '開催日:':'Date:',
+  'パート数:':'Parts:',
+  '時間:':'Duration:',
+  '進行を開始':'Start Show',
+  // ライブ画面
+  'TIMETABLE':'TIMETABLE',
+  'REALTIME STATUS':'REALTIME STATUS',
+  'NOW':'NOW',
+  '以降のスケジュール':'Upcoming Schedule',
+  'スタート（経過時間）':'Started (elapsed)',
+  '進行中':'Live',
+  '終了':'Done',
+  '待機':'Wait',
+  'スタート':'Start',
+  '遅延':'Delay',
+  'リセット':'Reset',
+  '反映':'Apply',
+  '共有':'Share',
+  '編集':'Edit',
+  '⌂ ホーム':'⌂ Home',
+  '✎ 編集':'✎ Edit',
+  // モーダル
+  'スタッフへ共有':'Share with Staff',
+  'スタッフはClaudeアカウント不要で閲覧できます。':'Staff can view without an account.',
+  'カメラでスキャン':'Scan with camera',
+  'URLをコピー':'Copy URL',
+  '✓ コピーしました':'✓ Copied',
+  'キャンセル':'Cancel',
+  'テンプレートから読み込み':'Load Template',
+  'テンプレートとして保存':'Save as Template',
+  '保存':'Save',
+  '削除しますか？':'Delete?',
+  '保存済みテンプレートはありません':'No saved templates',
+  // フッター
+  '利用ガイド（PDF）をダウンロード':'Download User Guide (PDF)',
+  'アプリコンセプト':'About the App',
+  '広告':'Ad',
+  'ADVERTISEMENT':'ADVERTISEMENT',
+  'AdSense審査通過後にここに広告が表示されます':'Ads will appear here after AdSense approval',
+  // メッセージ系
+  'Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。':'Cannot share: Firebase not connected.\nPlease configure Firebase from the home screen.',
+  '読み込めるスケジュールがありませんでした。\n時刻は HH:MM 形式で入力してください。':'No schedule could be loaded.\nPlease use HH:MM format for times.',
+  'ファイルの読み込みに失敗しました：\n':'Failed to read file:\n',
+};
+
+function getLang(){return localStorage.getItem('et_lang')||'ja';}
+function setLang(lang){
+  localStorage.setItem('et_lang',lang);
+  document.getElementById('lang-ja').classList.toggle('active',lang==='ja');
+  document.getElementById('lang-en').classList.toggle('active',lang==='en');
+  applyI18n();
+}
+function tr(text){
+  if(getLang()==='ja')return text;
+  return i18nDict[text]||text;
+}
+function applyI18n(){
+  const lang=getLang();
+  // 各テキストノードを走査して翻訳
+  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);
+  const nodes=[];
+  let n;while(n=walker.nextNode())nodes.push(n);
+  nodes.forEach(node=>{
+    const orig=node.dataset_orig||node.textContent;
+    if(!node._origText){
+      // 初回：オリジナル保存
+      node._origText=node.textContent;
+    }
+    const txt=node._origText.trim();
+    if(!txt)return;
+    if(lang==='en'&&i18nDict[txt]){
+      node.textContent=node._origText.replace(txt,i18nDict[txt]);
+    }else if(lang==='ja'){
+      node.textContent=node._origText;
+    }
+  });
+  // placeholder属性も翻訳
+  document.querySelectorAll('[placeholder]').forEach(el=>{
+    if(!el._origPlaceholder)el._origPlaceholder=el.placeholder;
+    const orig=el._origPlaceholder;
+    if(lang==='en'&&i18nDict[orig]){
+      el.placeholder=i18nDict[orig];
+    }else{
+      el.placeholder=orig;
+    }
+  });
+}
+
+// 起動時に言語を適用
+window.addEventListener('DOMContentLoaded',()=>{
+  const lang=getLang();
+  document.getElementById('lang-ja').classList.toggle('active',lang==='ja');
+  document.getElementById('lang-en').classList.toggle('active',lang==='en');
+  setTimeout(applyI18n,100);
+});
+
+// 画面切替・DOM変更後のため、定期的に再適用（軽量）
+let _lastLang='';
+setInterval(()=>{
+  const lang=getLang();
+  if(lang==='en')applyI18n();
+},800);
 </script>
 </body>
 </html>
