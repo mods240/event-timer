@@ -80,10 +80,11 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
 /* Language Switcher - 左上に配置（右上のHomeボタンと干渉しないため） */
 .lang-switch{position:fixed;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:4px;padding:2px;z-index:500;backdrop-filter:blur(4px);}
+.lang-switch.inline-mode{position:static !important;top:auto !important;left:auto !important;transform:none !important;display:inline-flex;}
 .lang-btn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.14em;padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .15s;}
 .lang-btn:hover{color:var(--text);}
 .lang-btn.active{background:rgba(74,184,255,.18);color:var(--accent);}
-@media(max-width:768px){.lang-switch{top:6px;}.lang-btn{font-size:10px;padding:3px 8px;}}
+@media(max-width:768px){.lang-switch{top:6px;}.lang-btn{font-size:10px;padding:3px 8px;}.lang-switch.viewer-mode{position:absolute !important;top:auto !important;left:auto !important;right:14px !important;transform:none !important;margin-top:80px;z-index:200;}}
 .home-sub{font-size:16px;letter-spacing:.25em;color:#8ab0cc;margin-bottom:10px;}
 .fb-indicator{display:inline-flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.14em;color:#8ab0cc;margin-bottom:36px;}
 .fb-dot{width:11px;height:11px;border-radius:50%;background:var(--muted);}
@@ -238,9 +239,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-tt-header .live-tt-title{margin-bottom:0;}
 .delay-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
 .delay-wrap .lc-wrap{text-align:right;}
-.delay-wrap .lc{font-size:28px;}
-.delay-wrap .lc-sec{font-size:14px;}
-.delay-wrap .lc-date{font-size:11px;}
 .live-tt-row{display:grid;grid-template-columns:28px 100px 1fr 62px;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
@@ -494,7 +492,7 @@ let liveIsFullscreen=false;
 <body>
 
 <!-- Language Switcher -->
-<div class="lang-switch">
+<div class="lang-switch" id="lang-switch-wrap">
   <button class="lang-btn active" id="lang-ja" onclick="setLang('ja')">JA</button>
   <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
 </div>
@@ -1821,6 +1819,30 @@ window.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('lang-en').classList.toggle('active',lang==='en');
   setTimeout(applyI18n,100);
 });
+
+// スマホで閲覧モードの場合、言語切替ボタンの位置を「閲覧モード」バッジの隣に動的に移動
+function relocateLangSwitch(){
+  const langSwitch=document.getElementById('lang-switch-wrap');
+  if(!langSwitch)return;
+  const isMobile=window.innerWidth<=768;
+  const viewerActive=document.getElementById('screen-viewer')&&document.getElementById('screen-viewer').classList.contains('active');
+  const viewerBadge=document.querySelector('#screen-viewer .viewer-badge');
+  if(isMobile&&viewerActive&&viewerBadge){
+    // 閲覧モードバッジの直後に移動
+    if(langSwitch.parentNode!==viewerBadge.parentNode){
+      viewerBadge.parentNode.insertBefore(langSwitch,viewerBadge.nextSibling);
+      langSwitch.classList.add('inline-mode');
+    }
+  }else{
+    // 元の場所（body直下）に戻す
+    if(langSwitch.classList.contains('inline-mode')){
+      document.body.insertBefore(langSwitch,document.body.firstChild);
+      langSwitch.classList.remove('inline-mode');
+    }
+  }
+}
+window.addEventListener('resize',relocateLangSwitch);
+setInterval(relocateLangSwitch,500);
 
 // liveRender後に翻訳を再適用するためのフック
 // 軽量な定期チェックで動的テキストを翻訳
