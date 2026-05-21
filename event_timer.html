@@ -1477,13 +1477,15 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   }
   const from=bf?0:ai+1;const ups=sorted.slice(from).slice(0,6);
   if(ups.length){
-    document.getElementById(nextId).innerHTML=`<div class="cd-next-title">以降のスケジュール</div>`+
+    const upcomingLabel=getLang()==='en'?'Upcoming Schedule':'以降のスケジュール';
+    const startLabel=getLang()==='en'?'Start':'スタート';
+    document.getElementById(nextId).innerHTML=`<div class="cd-next-title">${upcomingLabel}</div>`+
       ups.map(r=>{
         const diff=Math.max(0,eff(r)*60-nowSecs);
         const dh=Math.floor(diff/3600),dm=Math.floor(diff%3600/60),ds=diff%60;
         const cdStr=dh>0?`${pad(dh)}:${pad(dm)}:${pad(ds)}`:`${pad(dm)}:${pad(ds)}`;
         const adjD=delay!==0&&!r.locked?`<span style="color:var(--magenta)">${effStr(r)}</span> <span style="text-decoration:line-through;opacity:.3;font-size:.85em">${minsToStr(r.baseTime)}</span>`:effStr(r);
-        return`<div class="cd-ni${r.locked?' locked-ni':''}"><div style="flex:1;min-width:0"><div class="cd-ni-label">${esc(r.label||effStr(r))}${r.locked?' 🔒':''}</div><div class="cd-ni-start">${adjD} スタート</div></div><div class="cd-ni-cd">${cdStr}</div></div>`;
+        return`<div class="cd-ni${r.locked?' locked-ni':''}"><div style="flex:1;min-width:0"><div class="cd-ni-label">${esc(r.label||effStr(r))}${r.locked?' 🔒':''}</div><div class="cd-ni-start">${adjD} ${startLabel}</div></div><div class="cd-ni-cd">${cdStr}</div></div>`;
       }).join('');
   }else document.getElementById(nextId).innerHTML='';
 }
