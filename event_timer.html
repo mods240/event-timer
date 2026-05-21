@@ -1443,11 +1443,13 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   }
   if(bf){
     const diff=Math.max(0,eff(sorted[0])*60-nowSecs);
-    document.getElementById(labelId).textContent=`開始まで — ${sorted[0].label||effStr(sorted[0])}`;
+    const untilLabel=getLang()==='en'?'Until':'開始まで';
+    const startWord=getLang()==='en'?'Start':'スタート';
+    document.getElementById(labelId).textContent=`${untilLabel} — ${sorted[0].label||effStr(sorted[0])}`;
     document.getElementById(hId).textContent=pad(Math.floor(diff/3600));
     document.getElementById(mId).textContent=pad(Math.floor(diff%3600/60));
     document.getElementById(sId).textContent=pad(diff%60);
-    document.getElementById(subId).textContent=`スタート ${effStr(sorted[0])}`;
+    document.getElementById(subId).textContent=`${startWord} ${effStr(sorted[0])}`;
     document.getElementById(progId).style.width='0%';
   }else if(ai===-1){
     document.getElementById(labelId).textContent='すべてのパートが終了しました';
