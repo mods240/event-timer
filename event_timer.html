@@ -8,7 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#0a0e14;--surface:#141b24;
@@ -77,14 +76,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #screen-home{align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 60%,rgba(74,184,255,.07) 0%,transparent 65%);}
 .home-inner{text-align:center;animation:fadeUp .6s ease both;}
 .home-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);letter-spacing:.2em;color:var(--accent);margin-bottom:8px;}
-
-/* Language Switcher - 左上に配置（右上のHomeボタンと干渉しないため） */
-.lang-switch{position:fixed;top:8px;left:50%;transform:translateX(-50%);display:flex;gap:2px;background:rgba(0,0,0,.7);border:1px solid var(--border);border-radius:4px;padding:2px;z-index:500;backdrop-filter:blur(4px);}
-.lang-switch.inline-mode{position:static !important;top:auto !important;left:auto !important;transform:none !important;display:inline-flex;}
-.lang-btn{background:none;border:none;color:var(--muted);font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:.14em;padding:4px 10px;border-radius:3px;cursor:pointer;transition:all .15s;}
-.lang-btn:hover{color:var(--text);}
-.lang-btn.active{background:rgba(74,184,255,.18);color:var(--accent);}
-@media(max-width:768px){.lang-switch{top:6px;}.lang-btn{font-size:10px;padding:3px 8px;}.lang-switch.viewer-mode{position:absolute !important;top:auto !important;left:auto !important;right:14px !important;transform:none !important;margin-top:80px;z-index:200;}}
 .home-sub{font-size:16px;letter-spacing:.25em;color:#8ab0cc;margin-bottom:10px;}
 .fb-indicator{display:inline-flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.14em;color:#8ab0cc;margin-bottom:36px;}
 .fb-dot{width:11px;height:11px;border-radius:50%;background:var(--muted);}
@@ -235,10 +226,6 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .live-main{display:grid;grid-template-columns:1fr 360px;flex:1;overflow:hidden;}
 .live-tt{padding:16px 20px;overflow-y:auto;border-right:2px solid var(--border);}
 .live-tt-title{font-size:13px;letter-spacing:.25em;color:var(--accent);margin-bottom:12px;font-weight:700;}
-.live-tt-header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
-.live-tt-header .live-tt-title{margin-bottom:0;}
-.delay-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
-.delay-wrap .lc-wrap{text-align:right;}
 .live-tt-row{display:grid;grid-template-columns:28px 100px 1fr 62px;align-items:center;gap:8px;padding:11px 14px;border-radius:4px;border:1px solid transparent;margin-bottom:4px;position:relative;transition:all .2s;background:var(--row-bg);}
 .live-tt-row.is-active{border-color:var(--accent);background:rgba(56,200,255,0.14);box-shadow:0 0 0 1px var(--accent);}
 .live-tt-row.is-active::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--accent);border-radius:4px 0 0 4px;box-shadow:0 0 8px var(--accent);}
@@ -468,7 +455,6 @@ let liveIsFullscreen=false;
   .live-cd{padding:8px 12px !important;overflow-y:auto;height:55vh;gap:5px !important;}
   .live-header{flex-wrap:wrap;padding:8px 12px !important;gap:6px !important;}
   .lh-left{flex:1 1 100%;}
-  .live-tt-header{flex-direction:column;align-items:stretch;}
   .delay-bar{flex:1 1 auto;justify-content:center;}
   .lc-wrap{display:none;}
   .lh-btns{flex:1 1 auto;justify-content:flex-end;}
@@ -490,12 +476,6 @@ let liveIsFullscreen=false;
 </style>
 </head>
 <body>
-
-<!-- Language Switcher -->
-<div class="lang-switch" id="lang-switch-wrap">
-  <button class="lang-btn active" id="lang-ja" onclick="setLang('ja')">JA</button>
-  <button class="lang-btn" id="lang-en" onclick="setLang('en')">EN</button>
-</div>
 
 <!-- MODALS -->
 <div class="modal-overlay" id="modal-tpl-load"><div class="modal"><div class="modal-title">テンプレートから読み込み</div><div class="tpl-list" id="tpl-load-list"></div><div class="modal-btns"><button class="mbtn mbtn-cancel" onclick="closeModal('modal-tpl-load')">キャンセル</button></div></div></div>
@@ -550,19 +530,10 @@ let liveIsFullscreen=false;
     <div class="home-logo">EVENT TIMER</div>
     <div class="home-sub">イベント進行管理ツール</div>
     <div class="fb-indicator"><div class="fb-dot" id="home-fb-dot"></div><span id="home-fb-label">Firebase未接続</span></div>
-    <div class="home-actions" style="flex-direction:column;align-items:center;gap:8px">
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="home-btn home-btn-primary" onclick="startWizard()">＋ 新しいイベントを作成</button>
-        <button class="home-btn home-btn-secondary" onclick="openTplLoadFromHome()">📋 既存テンプレートを流用して作成</button>
-      </div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="home-btn home-btn-ghost" onclick="downloadExcelTemplate()">⬇ エクセルテンプレートDL</button>
-        <button class="home-btn home-btn-secondary" onclick="document.getElementById('excel-input').click()">📊 エクセルから読み込み</button>
-      </div>
-      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-        <button class="home-btn home-btn-ghost" onclick="showScreen('screen-fbsetup')">⚙ Firebase設定</button>
-      </div>
-      <input type="file" id="excel-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="importExcel(event)">
+    <div class="home-actions">
+      <button class="home-btn home-btn-primary" onclick="startWizard()">＋ 新しいイベントを作成</button>
+      <button class="home-btn home-btn-secondary" onclick="openTplLoadFromHome()">📋 テンプレートから作成</button>
+      <button class="home-btn home-btn-ghost" onclick="showScreen('screen-fbsetup')">⚙ Firebase設定</button>
     </div>
     <div class="saved-title">保存済みイベント</div>
     <div class="saved-list" id="saved-list"></div>
@@ -661,6 +632,20 @@ let liveIsFullscreen=false;
       <div class="ev-date-badge" id="lh-evdate" style="display:none"></div>
       <div class="sync-dot" id="sync-dot" title="Firebase同期状態"></div>
     </div>
+    <div class="delay-bar">
+      <div class="delay-lbl">遅延</div>
+      <button class="dbtn" onclick="changeDelay(-5)">−5</button>
+      <button class="dbtn" onclick="changeDelay(-1)">−1</button>
+      <div class="delay-val" id="delay-val">+0分</div>
+      <button class="dbtn" onclick="changeDelay(+1)">+1</button>
+      <button class="dbtn" onclick="changeDelay(+5)">+5</button>
+      <button class="d-apply" onclick="applyDelay()">反映</button>
+      <button class="d-reset" onclick="resetDelay()">リセット</button>
+    </div>
+    <div class="lc-wrap">
+      <div><span class="lc" id="lh-h"></span><span class="lc"><span class="colon">:</span></span><span class="lc" id="lh-m"></span><span class="lc-sec" id="lh-s"></span></div>
+      <div class="lc-date" id="lh-date"></div>
+    </div>
     <div class="lh-btns">
       <button class="lh-btn share-btn" onclick="openShareModal()">📡 共有</button>
       <button class="lh-btn" onclick="goEdit()">✎ 編集</button>
@@ -669,25 +654,7 @@ let liveIsFullscreen=false;
   </div>
   <div class="live-main">
     <div class="live-tt">
-      <div class="live-tt-header">
-        <div class="live-tt-title">TIMETABLE</div>
-        <div class="delay-wrap">
-          <div class="lc-wrap">
-            <div><span class="lc" id="lh-h"></span><span class="lc"><span class="colon">:</span></span><span class="lc" id="lh-m"></span><span class="lc-sec" id="lh-s"></span></div>
-            <div class="lc-date" id="lh-date"></div>
-          </div>
-          <div class="delay-bar">
-            <div class="delay-lbl">遅延</div>
-            <button class="dbtn" onclick="changeDelay(-5)">−5</button>
-            <button class="dbtn" onclick="changeDelay(-1)">−1</button>
-            <div class="delay-val" id="delay-val">+0分</div>
-            <button class="dbtn" onclick="changeDelay(+1)">+1</button>
-            <button class="dbtn" onclick="changeDelay(+5)">+5</button>
-            <button class="d-apply" onclick="applyDelay()">反映</button>
-            <button class="d-reset" onclick="resetDelay()">リセット</button>
-          </div>
-        </div>
-      </div>
+      <div class="live-tt-title">TIMETABLE</div>
       <div id="live-tt-list"></div>
     </div>
     <div class="live-cd">
@@ -909,177 +876,11 @@ function applyTplRows(tpl){
   renderWzTable();
 }
 
-/* EXCEL IMPORT/EXPORT */
-function downloadExcelTemplate(){
-  const today=new Date();
-  const dateStr=`${today.getFullYear()}-${pad(today.getMonth()+1)}-${pad(today.getDate())}`;
-  const data=[
-    ['イベント名:','例：第10回 周年式典'],
-    ['開催日:',dateStr],
-    [''],
-    ['時刻','パート名','ロック（✓で固定）'],
-    ['14:00','オープニング','✓'],
-    ['14:10','キーノートスピーチ','✓'],
-    ['14:40','パネルディスカッション',''],
-    ['15:00','休憩','✓'],
-    ['15:10','Q&Aセッション',''],
-    ['15:30','クロージング','✓']
-  ];
-  const ws=XLSX.utils.aoa_to_sheet(data);
-  ws['!cols']=[{wch:14},{wch:30},{wch:18}];
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'スケジュール');
-  const guide=[
-    ['EVENT TIMER Excelテンプレート 使い方'],
-    [''],
-    ['【上部（イベント情報）】'],
-    ['1行目 B列：イベント名を入力'],
-    ['2行目 B列：開催日を入力（YYYY-MM-DD 形式 例：2026-05-20）'],
-    [''],
-    ['【スケジュール表（4行目以降）】'],
-    ['A列（時刻）：イベント開始時刻（HH:MM 形式、例：14:00）'],
-    ['B列（パート名）：そのパートの名前'],
-    ['C列（ロック）：✓をつけるとそのパートは固定時間'],
-    [''],
-    ['【使い方】'],
-    ['1. このExcelを編集してイベント情報とスケジュールを入力'],
-    ['2. EVENT TIMERの「エクセルから読み込み」ボタンをクリック'],
-    ['3. このファイルを選択して読み込み'],
-    ['4. 自動でウィザードに反映されます'],
-    [''],
-    ['【注意】'],
-    ['・時刻は必ず HH:MM 形式で（例：14:00）'],
-    ['・開催日は YYYY-MM-DD 形式で（例：2026-05-20）'],
-    ['・パート名は30文字以内推奨'],
-    ['・ロック列に ✓ または「ロック」と書くと固定パートになります']
-  ];
-  const wsGuide=XLSX.utils.aoa_to_sheet(guide);
-  wsGuide['!cols']=[{wch:55}];
-  XLSX.utils.book_append_sheet(wb,wsGuide,'使い方');
-  XLSX.writeFile(wb,'EVENT_TIMER_template.xlsx');
-}
-
-function importExcel(event){
-  const file=event.target.files[0];
-  if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    try{
-      const data=new Uint8Array(e.target.result);
-      const wb=XLSX.read(data,{type:'array',cellDates:true});
-      const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,defval:'',raw:false});
-      let evName='';
-      let evDate='';
-      let scheduleStart=0;
-      // 上部からイベント名・日付を探す
-      for(let i=0;i<Math.min(rows.length,5);i++){
-        const r=rows[i];
-        if(!r||!r[0])continue;
-        const key=String(r[0]).trim();
-        const val=String(r[1]||'').trim();
-        if(key.includes('イベント名')&&val&&!val.startsWith('例：')){evName=val;}
-        if((key.includes('開催日')||key.includes('日程')||key.includes('日付'))&&val){
-          // 日付形式を正規化
-          let d=val;
-          // "2026-05-22 00:00:00" / "2026-05-22T00:00:00" → "2026-05-22"
-          if(/^\d{4}-\d{1,2}-\d{1,2}[\sT]/.test(d)){
-            d=d.split(/[\sT]/)[0];
-          }
-          // "5/22/26" (米国形式 M/D/YY) → "2026-05-22"
-          if(/^\d{1,2}\/\d{1,2}\/\d{2}$/.test(d)){
-            const[m,da,y]=d.split('/');
-            const fullY=parseInt(y)<70?'20'+pad(y):'19'+pad(y);
-            d=`${fullY}-${pad(m)}-${pad(da)}`;
-          }
-          // "5/22/2026" (M/D/YYYY) → "2026-05-22"
-          else if(/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(d)){
-            const[m,da,y]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
-          }
-          // "2026/5/22" (YYYY/M/D) → "2026-05-22"
-          else if(/^\d{4}\/\d{1,2}\/\d{1,2}/.test(d)){
-            d=d.split(/[\sT]/)[0];
-            const[y,m,da]=d.split('/');d=`${y}-${pad(m)}-${pad(da)}`;
-          }
-          // "2026-5-22" or "2026-05-22" → "2026-05-22"
-          else if(/^\d{4}-\d{1,2}-\d{1,2}$/.test(d)){
-            const[y,m,da]=d.split('-');d=`${y}-${pad(m)}-${pad(da)}`;
-          }
-          evDate=d;
-        }
-      }
-      // ヘッダー行を探す（時刻 列のある行）
-      let headerRow=-1;
-      for(let i=0;i<rows.length;i++){
-        const r=rows[i];
-        if(!r)continue;
-        const c0=String(r[0]||'').trim();
-        if(c0==='時刻'||c0==='time'||c0==='Time'){headerRow=i;break;}
-      }
-      scheduleStart=headerRow>=0?headerRow+1:1;
-      const parsed=[];
-      for(let i=scheduleStart;i<rows.length;i++){
-        const r=rows[i];
-        if(!r||!r[0])continue;
-        let timeStr=String(r[0]).trim();
-        // Excelの時刻形式（小数）を変換
-        if(/^0\.\d+$/.test(timeStr)){
-          const totalMins=Math.round(parseFloat(timeStr)*24*60);
-          timeStr=`${pad(Math.floor(totalMins/60))}:${pad(totalMins%60)}`;
-        }
-        // "14:00:00" → "14:00"
-        if(/^\d{1,2}:\d{2}:\d{2}/.test(timeStr)){
-          timeStr=timeStr.substring(0,5);
-        }
-        const m=toMins(timeStr);
-        if(m===null)continue;
-        const label=String(r[1]||'').trim();
-        const lockStr=String(r[2]||'').trim();
-        const locked=lockStr==='✓'||lockStr.toLowerCase()==='true'||lockStr==='ロック'||lockStr==='固定'||lockStr==='○';
-        parsed.push({baseTime:m,label,locked});
-      }
-      if(!parsed.length){
-        alert('読み込めるスケジュールがありませんでした。\n時刻は HH:MM 形式で入力してください。');
-        event.target.value='';
-        return;
-      }
-      // ウィザード起動してデータ反映
-      startWizard();
-      wzNid=1;
-      wzRows=parsed.map(p=>({id:wzNid++,baseTime:p.baseTime,label:p.label,locked:p.locked}));
-      if(evName){
-        document.getElementById('wz-evname').value=evName;
-        const en2=document.getElementById('wz-evname2');if(en2)en2.value=evName;
-      }
-      if(evDate){
-        document.getElementById('wz-evdate').value=evDate;
-        const ed2=document.getElementById('wz-evdate2');if(ed2)ed2.value=evDate;
-      }
-      renderWzTable();
-      setWzStep(2);
-      event.target.value='';
-    }catch(err){
-      alert('ファイルの読み込みに失敗しました：\n'+err.message);
-      event.target.value='';
-    }
-  };
-  reader.readAsArrayBuffer(file);
-}
-
 /* HOME */
 function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function formatDate(dateStr){
   if(!dateStr)return'';
-  try{
-    const d=new Date(dateStr+'T00:00:00');
-    if(typeof getLang==='function'&&getLang()==='en'){
-      const de=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-      const me=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-      return`${me[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()} (${de[d.getDay()]})`;
-    }
-    const dj=['日','月','火','水','木','金','土'];
-    return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;
-  }
+  try{const d=new Date(dateStr+'T00:00:00');const dj=['日','月','火','水','木','金','土'];return`${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日（${dj[d.getDay()]}）`;}
   catch{return dateStr;}
 }
 function renderHome(){
@@ -1102,7 +903,7 @@ function renderHome(){
 function confirmDel(id){const ev=getEvent(id);if(!ev)return;if(confirm(`「${ev.name||'（無題）'}」を削除しますか？`)){deleteEvent(id);renderHome();}}
 function openEvent(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);startLive(ev);}
 function editFromHome(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
-function goHome(){pendingDelay=0;appliedDelay=0;if(typeof liveCheckedIds!=='undefined'&&liveCheckedIds.clear)liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
+function goHome(){pendingDelay=0;appliedDelay=0;liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
 
 /* WIZARD */
 let currentEventId=null,pendingDelay=0,appliedDelay=0;
@@ -1250,7 +1051,7 @@ function startLive(ev){
   liveRows=event.rows.map((r,i)=>({...r,id:i+1,locked:r.locked===true}));
   currentSessionId=event.id;
   pendingDelay=0;appliedDelay=0;
-  document.getElementById('delay-val').textContent=getLang()==='en'?'+0min':'+0分';
+  document.getElementById('delay-val').textContent='+0分';
   document.getElementById('delay-status').classList.remove('on');
   document.getElementById('lh-evname').textContent=event.name?`/ ${event.name}`:'';
   const dateBadge=document.getElementById('lh-evdate');
@@ -1295,7 +1096,7 @@ function getServerNow(){
 }
 function getEff(r){return r.locked?r.baseTime:r.baseTime+appliedDelay;}
 function getEffStr(r){return minsToStr(getEff(r));}
-function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+(getLang()==='en'?'min':'分');}
+function changeDelay(d){pendingDelay+=d;document.getElementById('delay-val').textContent=(pendingDelay>=0?'+':'')+pendingDelay+'分';}
 function applyDelay(){
   appliedDelay=pendingDelay;
   const ds=document.getElementById('delay-status'),dt=document.getElementById('delay-status-text');
@@ -1303,16 +1104,14 @@ function applyDelay(){
   else{ds.classList.add('on');dt.textContent=`現在 ${appliedDelay>0?'+':''}${appliedDelay}分 遅延中 — 🔒固定以外を調整済み`;}
   liveRender();publishLiveState();
 }
-function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent=getLang()==='en'?'+0min':'+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
+function resetDelay(){pendingDelay=0;appliedDelay=0;document.getElementById('delay-val').textContent='+0分';document.getElementById('delay-status').classList.remove('on');liveRender();publishLiveState();}
 
 function tickLiveClock(){
   const n=getServerNow();
   document.getElementById('lh-h').textContent=pad(n.getHours());
   document.getElementById('lh-m').textContent=pad(n.getMinutes());
   document.getElementById('lh-s').textContent=pad(n.getSeconds());
-  document.getElementById('lh-date').textContent=getLang()==='en'
-    ?`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][n.getDay()]})`
-    :`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${DJ[n.getDay()]})`;
+  document.getElementById('lh-date').textContent=`${n.getFullYear()}.${pad(n.getMonth()+1)}.${pad(n.getDate())} (${DJ[n.getDay()]})`;
 }
 
 function startEditEvName(){
@@ -1387,31 +1186,15 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
         :`<div class="lt-time-only" style="${r.locked?'color:var(--warn)':''}">${minsToStr(r.baseTime)}</div>`;
       return`<div class="${rc}">${lockEl(r)}<div>${timeHtmlF}</div><div class="lt-label">${esc(r.label||'—')}</div><div></div></div>`;
     }).join('');
-    document.getElementById(labelId).textContent=tr(`イベント開始まで`);
-    if(dd>0){
-      document.getElementById(hId).textContent=pad(dd);
-      document.getElementById(mId).textContent=pad(dh);
-      document.getElementById(sId).textContent=pad(dm);
-      const subTxt=getLang()==='en'
-        ?`${dd}d ${dh}h ${dm}m left — ${formatDate(eventDate)}`
-        :`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;
-      document.getElementById(subId).textContent=subTxt;
-    }
-    else{
-      document.getElementById(hId).textContent=pad(dh);
-      document.getElementById(mId).textContent=pad(dm);
-      document.getElementById(sId).textContent=pad(ds);
-      const subTxt=getLang()==='en'
-        ?`${formatDate(eventDate)} Start`
-        :`${formatDate(eventDate)} スタート`;
-      document.getElementById(subId).textContent=subTxt;
-    }
+    document.getElementById(labelId).textContent=`イベント開始まで`;
+    if(dd>0){document.getElementById(hId).textContent=pad(dd);document.getElementById(mId).textContent=pad(dh);document.getElementById(sId).textContent=pad(dm);document.getElementById(subId).textContent=`あと${dd}日${dh}時間${dm}分 — ${formatDate(eventDate)}`;}
+    else{document.getElementById(hId).textContent=pad(dh);document.getElementById(mId).textContent=pad(dm);document.getElementById(sId).textContent=pad(ds);document.getElementById(subId).textContent=`${formatDate(eventDate)} スタート`;}
     document.getElementById(progId).style.width='0%';document.getElementById(nextId).innerHTML='';return;
   }
 
   if(dayDiff<0){
     document.getElementById(ttId).innerHTML=rows.map(r=>`<div class="live-tt-row is-done"><div></div><div><div class="lt-time-only" style="color:var(--muted)">${minsToStr(r.baseTime)}</div></div><div class="lt-label">${esc(r.label||'—')}</div><div class="lt-badge done">終了</div></div>`).join('');
-    document.getElementById(labelId).textContent=tr('イベントは終了しました');
+    document.getElementById(labelId).textContent='イベントは終了しました';
     [hId,mId,sId].forEach(id=>document.getElementById(id).textContent='--');
     document.getElementById(subId).textContent=formatDate(eventDate);
     document.getElementById(progId).style.width='100%';document.getElementById(nextId).innerHTML='';return;
@@ -1443,13 +1226,11 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
   }
   if(bf){
     const diff=Math.max(0,eff(sorted[0])*60-nowSecs);
-    const untilLabel=getLang()==='en'?'Until':'開始まで';
-    const startWord=getLang()==='en'?'Start':'スタート';
-    document.getElementById(labelId).textContent=`${untilLabel} — ${sorted[0].label||effStr(sorted[0])}`;
+    document.getElementById(labelId).textContent=`開始まで — ${sorted[0].label||effStr(sorted[0])}`;
     document.getElementById(hId).textContent=pad(Math.floor(diff/3600));
     document.getElementById(mId).textContent=pad(Math.floor(diff%3600/60));
     document.getElementById(sId).textContent=pad(diff%60);
-    document.getElementById(subId).textContent=`${startWord} ${effStr(sorted[0])}`;
+    document.getElementById(subId).textContent=`スタート ${effStr(sorted[0])}`;
     document.getElementById(progId).style.width='0%';
   }else if(ai===-1){
     document.getElementById(labelId).textContent='すべてのパートが終了しました';
@@ -1471,23 +1252,19 @@ function renderCountdown(rows,delay,eventDate,ttId,labelId,hId,mId,sId,subId,pro
       document.getElementById(hId).textContent=pad(Math.floor(el/3600));
       document.getElementById(mId).textContent=pad(Math.floor(el%3600/60));
       document.getElementById(sId).textContent=pad(Math.max(0,el%60));
-      document.getElementById(subId).textContent=getLang()==='en'
-        ?`${effStr(cur)} Started (elapsed)`
-        :`${effStr(cur)} スタート（経過時間）`;
+      document.getElementById(subId).textContent=`${effStr(cur)} スタート（経過時間）`;
       document.getElementById(progId).style.width='100%';
     }
   }
   const from=bf?0:ai+1;const ups=sorted.slice(from).slice(0,6);
   if(ups.length){
-    const upcomingLabel=getLang()==='en'?'Upcoming Schedule':'以降のスケジュール';
-    const startLabel=getLang()==='en'?'Start':'スタート';
-    document.getElementById(nextId).innerHTML=`<div class="cd-next-title">${upcomingLabel}</div>`+
+    document.getElementById(nextId).innerHTML=`<div class="cd-next-title">以降のスケジュール</div>`+
       ups.map(r=>{
         const diff=Math.max(0,eff(r)*60-nowSecs);
         const dh=Math.floor(diff/3600),dm=Math.floor(diff%3600/60),ds=diff%60;
         const cdStr=dh>0?`${pad(dh)}:${pad(dm)}:${pad(ds)}`:`${pad(dm)}:${pad(ds)}`;
         const adjD=delay!==0&&!r.locked?`<span style="color:var(--magenta)">${effStr(r)}</span> <span style="text-decoration:line-through;opacity:.3;font-size:.85em">${minsToStr(r.baseTime)}</span>`:effStr(r);
-        return`<div class="cd-ni${r.locked?' locked-ni':''}"><div style="flex:1;min-width:0"><div class="cd-ni-label">${esc(r.label||effStr(r))}${r.locked?' 🔒':''}</div><div class="cd-ni-start">${adjD} ${startLabel}</div></div><div class="cd-ni-cd">${cdStr}</div></div>`;
+        return`<div class="cd-ni${r.locked?' locked-ni':''}"><div style="flex:1;min-width:0"><div class="cd-ni-label">${esc(r.label||effStr(r))}${r.locked?' 🔒':''}</div><div class="cd-ni-start">${adjD} スタート</div></div><div class="cd-ni-cd">${cdStr}</div></div>`;
       }).join('');
   }else document.getElementById(nextId).innerHTML='';
 }
@@ -1573,13 +1350,15 @@ function closeFullscreenOverlay(){
   if(vb){vb.textContent='FULL';vb.classList.remove('active');}
 }
 function syncOverlay(){
-  // Copy current countdown values to overlay
-  const label=document.getElementById('cd-label')||document.getElementById('vcd-label');
-  const h=document.getElementById('cd-h')||document.getElementById('vcd-h');
-  const m=document.getElementById('cd-m')||document.getElementById('vcd-m');
-  const s=document.getElementById('cd-s')||document.getElementById('vcd-s');
-  const sub=document.getElementById('cd-sub')||document.getElementById('vcd-sub');
-  const prog=document.getElementById('cd-prog')||document.getElementById('vcd-prog');
+  // Check which screen is active and use correct element IDs
+  const isViewer=document.getElementById('screen-viewer').classList.contains('active');
+  const prefix=isViewer?'vcd':'cd';
+  const label=document.getElementById(prefix+'-label');
+  const h=document.getElementById(prefix+'-h');
+  const m=document.getElementById(prefix+'-m');
+  const s=document.getElementById(prefix+'-s');
+  const sub=document.getElementById(prefix+'-sub');
+  const prog=document.getElementById(prefix+'-prog');
   if(label)document.getElementById('fs-label').textContent=label.textContent;
   if(h)document.getElementById('fs-h').textContent=h.textContent;
   if(m)document.getElementById('fs-m').textContent=m.textContent;
@@ -1654,218 +1433,6 @@ window.addEventListener('message', e=>{
     if(vb){vb.textContent='FULL';vb.classList.remove('active');}
   }
 });
-
-/* ========== i18n SYSTEM ========== */
-const i18nDict={
-  // ホーム画面
-  'イベント進行管理ツール':'Real-time Event Timer',
-  'Firebase未接続':'Firebase Disconnected',
-  'Firebase接続中':'Firebase Connected',
-  '＋ 新しいイベントを作成':'+ Create New Event',
-  '📋 既存テンプレートを流用して作成':'📋 Use Existing Template',
-  '⬇ エクセルテンプレートDL':'⬇ Download Excel Template',
-  '📊 エクセルから読み込み':'📊 Import from Excel',
-  '⚙ Firebase設定':'⚙ Firebase Settings',
-  '保存済みイベント':'Saved Events',
-  '保存済みのイベントはありません':'No saved events',
-  // Firebase設定画面
-  'FIREBASE 接続設定':'FIREBASE CONNECTION SETUP',
-  'リアルタイム共有を有効にするための初期設定':'Initial setup for real-time sharing',
-  '接続テスト':'Test Connection',
-  '保存して開始':'Save & Start',
-  'Firebase なしで使う →':'Use without Firebase →',
-  // ウィザード共通
-  'イベント作成':'Create Event',
-  '← ホームへ':'← Home',
-  'STEP 1 — イベント名':'STEP 1 — Event Name',
-  'STEP 2 — タイムテーブルを作成':'STEP 2 — Build Timetable',
-  'STEP 3 — 確認':'STEP 3 — Confirm',
-  'イベント名':'Event Name',
-  'イベントの名前を入力してください':'Please enter an event name',
-  '開催日（任意）':'Date (optional)',
-  '次へ →':'Next →',
-  '← 戻る':'← Back',
-  // タイムテーブル
-  'タイムテーブル':'Timetable',
-  'テンプレート読込':'Load Template',
-  'テンプレート保存':'Save Template',
-  '固定':'Lock',
-  '開始時刻':'Start Time',
-  'パート名':'Part Name',
-  '末尾にパートを追加':'+ Add Part to End',
-  '選択行を一括シフト':'Bulk Shift Selected',
-  '分':'min',
-  '適用':'Apply',
-  'チェックした行の時刻をまとめてずらします（例：−60 で1時間前倒し）':'Shift checked rows together (e.g. −60 to advance by 1 hour)',
-  'ドラッグで並び替え':'Drag to reorder',
-  '上下移動':'Move up/down',
-  '直下に挿入':'Insert below',
-  '時刻固定':'Lock time',
-  '選択→一括シフト':'Select → Bulk shift',
-  'パートを追加したら「次へ」へ':'Add parts and click Next',
-  // 確認画面
-  '内容を確認して開始':'Review & Start',
-  'イベント名:':'Event Name:',
-  '開催日:':'Date:',
-  'パート数:':'Parts:',
-  '時間:':'Duration:',
-  '進行を開始':'Start Show',
-  // ライブ画面
-  'TIMETABLE':'TIMETABLE',
-  'REALTIME STATUS':'REALTIME STATUS',
-  'NOW':'NOW',
-  '以降のスケジュール':'Upcoming Schedule',
-  'スタート（経過時間）':'Started (elapsed)',
-  'イベント開始まで':'Time until event starts',
-  'イベントは終了しました':'Event has ended',
-  '進行中':'Live',
-  '終了':'Done',
-  '待機':'Wait',
-  'スタート':'Start',
-  '遅延':'Delay',
-  'リセット':'Reset',
-  '反映':'Apply',
-  '共有':'Share',
-  '📡 共有':'📡 Share',
-  '編集':'Edit',
-  '⌂ ホーム':'⌂ Home',
-  '✎ 編集':'✎ Edit',
-  '+0分':'+0min',
-  'FULL':'FULL',
-  // モーダル
-  'スタッフへ共有':'Share with Staff',
-  'スタッフはClaudeアカウント不要で閲覧できます。':'Staff can view without an account.',
-  'カメラでスキャン':'Scan with camera',
-  'URLをコピー':'Copy URL',
-  '✓ コピーしました':'✓ Copied',
-  'キャンセル':'Cancel',
-  'テンプレートから読み込み':'Load Template',
-  'テンプレートとして保存':'Save as Template',
-  '保存':'Save',
-  '削除しますか？':'Delete?',
-  '保存済みテンプレートはありません':'No saved templates',
-  // フッター
-  '利用ガイド（PDF）をダウンロード':'Download User Guide (PDF)',
-  'アプリコンセプト':'About the App',
-  '広告':'Ad',
-  'ADVERTISEMENT':'ADVERTISEMENT',
-  'AdSense審査通過後にここに広告が表示されます':'Ads will appear here after AdSense approval',
-  // メッセージ系
-  'Firebase未接続のため共有できません。\nホーム画面からFirebase設定を行ってください。':'Cannot share: Firebase not connected.\nPlease configure Firebase from the home screen.',
-  '読み込めるスケジュールがありませんでした。\n時刻は HH:MM 形式で入力してください。':'No schedule could be loaded.\nPlease use HH:MM format for times.',
-  'ファイルの読み込みに失敗しました：\n':'Failed to read file:\n',
-};
-
-function getLang(){return localStorage.getItem('et_lang')||'ja';}
-function setLang(lang){
-  localStorage.setItem('et_lang',lang);
-  document.getElementById('lang-ja').classList.toggle('active',lang==='ja');
-  document.getElementById('lang-en').classList.toggle('active',lang==='en');
-  applyI18n();
-}
-function tr(text){
-  if(getLang()==='ja')return text;
-  return i18nDict[text]||text;
-}
-function applyI18n(){
-  const lang=getLang();
-  // 各テキストノードを走査して翻訳
-  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);
-  const nodes=[];
-  let n;while(n=walker.nextNode())nodes.push(n);
-  nodes.forEach(node=>{
-    const currentText=node.textContent;
-    const trimmed=currentText.trim();
-    if(!trimmed)return;
-    // 初回保存：日本語ベースをキーとして使う
-    if(!node._origText){
-      node._origText=currentText;
-    }
-    const origTrimmed=node._origText.trim();
-    
-    if(lang==='en'){
-      // 完全一致の英訳がある場合
-      if(i18nDict[origTrimmed]){
-        const newText=node._origText.replace(origTrimmed,i18nDict[origTrimmed]);
-        if(node.textContent!==newText)node.textContent=newText;
-      }
-      // 現在テキストが日本語版で、その英訳がある場合（動的に変わったテキスト用）
-      else if(i18nDict[trimmed]){
-        const newText=currentText.replace(trimmed,i18nDict[trimmed]);
-        if(node.textContent!==newText){
-          node._origText=currentText;
-          node.textContent=newText;
-        }
-      }
-    }else if(lang==='ja'){
-      // 日本語に戻す
-      if(i18nDict[origTrimmed]&&currentText.includes(i18nDict[origTrimmed])){
-        node.textContent=node._origText;
-      }
-    }
-  });
-  // placeholder属性も翻訳
-  document.querySelectorAll('[placeholder]').forEach(el=>{
-    if(!el._origPlaceholder)el._origPlaceholder=el.placeholder;
-    const orig=el._origPlaceholder;
-    if(lang==='en'&&i18nDict[orig]){
-      el.placeholder=i18nDict[orig];
-    }else{
-      el.placeholder=orig;
-    }
-  });
-}
-
-// 起動時に言語を適用
-window.addEventListener('DOMContentLoaded',()=>{
-  const lang=getLang();
-  document.getElementById('lang-ja').classList.toggle('active',lang==='ja');
-  document.getElementById('lang-en').classList.toggle('active',lang==='en');
-  setTimeout(applyI18n,100);
-});
-
-// スマホで閲覧モードの場合、言語切替ボタンの位置を「閲覧モード」バッジの隣に動的に移動
-function relocateLangSwitch(){
-  const langSwitch=document.getElementById('lang-switch-wrap');
-  if(!langSwitch)return;
-  const isMobile=window.innerWidth<=768;
-  const viewerActive=document.getElementById('screen-viewer')&&document.getElementById('screen-viewer').classList.contains('active');
-  const viewerBadge=document.querySelector('#screen-viewer .viewer-badge');
-  if(isMobile&&viewerActive&&viewerBadge){
-    // 閲覧モードバッジの直後に移動
-    if(langSwitch.parentNode!==viewerBadge.parentNode){
-      viewerBadge.parentNode.insertBefore(langSwitch,viewerBadge.nextSibling);
-      langSwitch.classList.add('inline-mode');
-    }
-  }else{
-    // 元の場所（body直下）に戻す
-    if(langSwitch.classList.contains('inline-mode')){
-      document.body.insertBefore(langSwitch,document.body.firstChild);
-      langSwitch.classList.remove('inline-mode');
-    }
-  }
-}
-window.addEventListener('resize',relocateLangSwitch);
-setInterval(relocateLangSwitch,500);
-
-// liveRender後に翻訳を再適用するためのフック
-// 軽量な定期チェックで動的テキストを翻訳
-setInterval(()=>{
-  const lang=getLang();
-  if(lang==='ja')return;
-  // 動的に生成されたテキストノードを走査して英訳適用
-  const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,null,false);
-  const nodes=[];
-  let n;while(n=walker.nextNode())nodes.push(n);
-  nodes.forEach(node=>{
-    const txt=node.textContent.trim();
-    if(!txt)return;
-    if(i18nDict[txt]){
-      const newText=node.textContent.replace(txt,i18nDict[txt]);
-      if(node.textContent!==newText)node.textContent=newText;
-    }
-  });
-},500);
 </script>
 </body>
 </html>
