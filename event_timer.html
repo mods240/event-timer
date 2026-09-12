@@ -534,6 +534,8 @@ let liveIsFullscreen=false;
     <div class="home-actions">
       <button class="home-btn home-btn-primary" onclick="startWizard()">＋ 新しいイベントを作成</button>
       <button class="home-btn home-btn-secondary" onclick="openTplLoadFromHome()">📋 テンプレートから作成</button>
+      <button class="home-btn home-btn-secondary" onclick="document.getElementById('xlsx-import-input-home').click()">📑 エクセルから読み込み</button>
+      <input type="file" id="xlsx-import-input-home" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleXlsxImportFromHome(event)">
       <button class="home-btn home-btn-ghost" onclick="showScreen('screen-fbsetup')">⚙ Firebase設定</button>
     </div>
     <div class="saved-title">保存済みイベント</div>
@@ -905,7 +907,42 @@ function isLockedCell(v){
 }
 function handleXlsxImport(evt){
   const file=evt.target.files&&evt.target.files[0];
-  if(!file)return;
+  if(!file){return;}
+  parseXlsxScheduleFile(file,(result)=>{
+    if(result)applyImportedSchedule(result);
+    evt.target.value='';
+  });
+}
+function handleXlsxImportFromHome(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file){return;}
+  parseXlsxScheduleFile(file,(result)=>{
+    if(result){
+      startWizard();
+      applyImportedSchedule(result);
+      setWzStep(2);
+      showScreen('screen-wizard');
+    }
+    evt.target.value='';
+  });
+}
+function applyImportedSchedule(result){
+  const{evName,evDate,parsed}=result;
+  if(evName){
+    document.getElementById('wz-evname').value=evName;
+    const n2=document.getElementById('wz-evname2');if(n2)n2.value=evName;
+  }
+  if(evDate){
+    document.getElementById('wz-evdate').value=evDate;
+    const d2=document.getElementById('wz-evdate2');if(d2)d2.value=evDate;
+  }
+  wzNid=1;
+  wzRows=parsed.map(r=>({id:wzNid++,baseTime:r.mins,label:r.label,locked:r.locked}));
+  renderWzTable();
+  onEvNameInput();
+  alert(`${parsed.length}件のパートを読み込みました。`);
+}
+function parseXlsxScheduleFile(file,callback){
   const isCsv=/\.csv$/i.test(file.name);
   const reader=new FileReader();
   reader.onload=function(e){
@@ -916,7 +953,7 @@ function handleXlsxImport(evt){
       const sheetName=wb.SheetNames.includes('スケジュール')?'スケジュール':wb.SheetNames[0];
       const sheet=wb.Sheets[sheetName];
       const aoa=XLSX.utils.sheet_to_json(sheet,{header:1,raw:true,blankrows:false,defval:''});
-      if(!aoa.length){alert('シートにデータが見つかりませんでした。');return;}
+      if(!aoa.length){alert('シートにデータが見つかりませんでした。');callback(null);return;}
 
       // イベント名・開催日（先頭2行の B 列を想定。見つからなければスキップ）
       let evName='',evDate='';
@@ -933,7 +970,7 @@ function handleXlsxImport(evt){
       const lockCol=header.findIndex(c=>String(c).includes('ロック'));
 
       const dataRows=aoa.slice(headerIdx+1).filter(r=>r.some(c=>String(c).trim()!==''));
-      if(!dataRows.length){alert('タイムテーブルの行が見つかりませんでした。');return;}
+      if(!dataRows.length){alert('タイムテーブルの行が見つかりませんでした。');callback(null);return;}
 
       const parsed=dataRows.map(r=>{
         const mins=xlsxTimeToMins(timeCol>=0?r[timeCol]:r[0]);
@@ -942,26 +979,12 @@ function handleXlsxImport(evt){
         return{mins,label,locked};
       }).filter(r=>r.mins!==null&&r.label!=='');
 
-      if(!parsed.length){alert('時刻・パート名として読み取れる行がありませんでした。列の並びをご確認ください。');return;}
+      if(!parsed.length){alert('時刻・パート名として読み取れる行がありませんでした。列の並びをご確認ください。');callback(null);return;}
 
-      if(evName){
-        document.getElementById('wz-evname').value=evName;
-        const n2=document.getElementById('wz-evname2');if(n2)n2.value=evName;
-      }
-      if(evDate){
-        document.getElementById('wz-evdate').value=evDate;
-        const d2=document.getElementById('wz-evdate2');if(d2)d2.value=evDate;
-      }
-
-      wzNid=1;
-      wzRows=parsed.map(r=>({id:wzNid++,baseTime:r.mins,label:r.label,locked:r.locked}));
-      renderWzTable();
-      onEvNameInput();
-      alert(`${parsed.length}件のパートを読み込みました。`);
+      callback({evName,evDate,parsed});
     }catch(err){
       alert('ファイルの読み込みに失敗しました。テンプレート形式のxlsx/csvかご確認ください。');
-    }finally{
-      evt.target.value='';
+      callback(null);
     }
   };
   if(isCsv)reader.readAsText(file);
