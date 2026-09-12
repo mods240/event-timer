@@ -1018,7 +1018,7 @@ function renderHome(){
 function confirmDel(id){const ev=getEvent(id);if(!ev)return;if(confirm(`「${ev.name||'（無題）'}」を削除しますか？`)){deleteEvent(id);renderHome();}}
 function openEvent(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);startLive(ev);}
 function editFromHome(id){const ev=getEvent(id);if(!ev)return;currentEventId=id;loadWzFromEvent(ev);setWzStep(2);showScreen('screen-wizard');}
-function goHome(){pendingDelay=0;appliedDelay=0;liveCheckedIds.clear();stopLiveTick();fbUnsubAll();renderHome();}
+function goHome(){pendingDelay=0;appliedDelay=0;stopLiveTick();fbUnsubAll();renderHome();}
 
 /* WIZARD */
 let currentEventId=null,pendingDelay=0,appliedDelay=0;
