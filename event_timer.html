@@ -8,6 +8,7 @@
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#0a0e14;--surface:#141b24;
@@ -573,6 +574,8 @@ let liveIsFullscreen=false;
           <div class="wz-tt-actions">
             <button class="tpl-btn" onclick="openTplLoad()">📋 テンプレート読込</button>
             <button class="tpl-btn" onclick="openTplSave()">💾 テンプレート保存</button>
+            <button class="tpl-btn" onclick="document.getElementById('xlsx-import-input').click()">📑 エクセルから読み込み</button>
+            <input type="file" id="xlsx-import-input" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleXlsxImport(event)">
           </div>
         </div>
         <!-- ★ イベント名・日付（STEP2でも編集可） -->
@@ -874,6 +877,95 @@ function applyTplRows(tpl){
   const base=wzRows.length?Math.min(...wzRows.map(r=>r.baseTime)):9*60;
   wzNid=1;wzRows=tpl.rows.map(r=>({id:wzNid++,baseTime:base+r.offsetMins,label:r.label,locked:r.locked===true}));
   renderWzTable();
+}
+
+/* EXCEL IMPORT（香盤表ツール等からのエクスポートに対応） */
+function xlsxTimeToMins(v){
+  if(v==null||v==='')return null;
+  if(v instanceof Date)return v.getUTCHours()*60+v.getUTCMinutes();
+  if(typeof v==='number'){const totalMin=Math.round(v*24*60);return((totalMin%1440)+1440)%1440;}
+  const s=String(v).trim();
+  let m=s.match(/^(\d{1,2}):(\d{2})/);
+  if(m)return(parseInt(m[1],10)*60+parseInt(m[2],10))%1440;
+  return null;
+}
+function xlsxDateToStr(v){
+  if(v==null||v==='')return'';
+  if(v instanceof Date)return`${v.getUTCFullYear()}-${pad(v.getUTCMonth()+1)}-${pad(v.getUTCDate())}`;
+  if(typeof v==='number'){const d=XLSX.SSF.parse_date_code(v);if(d)return`${d.y}-${pad(d.m)}-${pad(d.d)}`;return'';}
+  const s=String(v).trim();
+  let m=s.match(/^(\d{4})[-\/](\d{1,2})[-\/](\d{1,2})/);
+  if(m)return`${m[1]}-${pad(+m[2])}-${pad(+m[3])}`;
+  return'';
+}
+function isLockedCell(v){
+  if(v===true)return true;
+  const s=String(v??'').trim();
+  return s==='✓'||s==='◯'||s==='○'||/ロック|固定|true/i.test(s);
+}
+function handleXlsxImport(evt){
+  const file=evt.target.files&&evt.target.files[0];
+  if(!file)return;
+  const isCsv=/\.csv$/i.test(file.name);
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try{
+      const wb=isCsv
+        ?XLSX.read(e.target.result,{type:'string'})
+        :XLSX.read(new Uint8Array(e.target.result),{type:'array',cellDates:true});
+      const sheetName=wb.SheetNames.includes('スケジュール')?'スケジュール':wb.SheetNames[0];
+      const sheet=wb.Sheets[sheetName];
+      const aoa=XLSX.utils.sheet_to_json(sheet,{header:1,raw:true,blankrows:false,defval:''});
+      if(!aoa.length){alert('シートにデータが見つかりませんでした。');return;}
+
+      // イベント名・開催日（先頭2行の B 列を想定。見つからなければスキップ）
+      let evName='',evDate='';
+      if(aoa[0]&&String(aoa[0][0]||'').includes('イベント名'))evName=String(aoa[0][1]||'').trim();
+      if(aoa[1]&&String(aoa[1][0]||'').includes('開催日'))evDate=xlsxDateToStr(aoa[1][1]);
+
+      // ヘッダー行（「時刻」「パート名」を含む行）を探す
+      let headerIdx=aoa.findIndex(r=>r.some(c=>String(c).includes('時刻'))&&r.some(c=>String(c).includes('パート名')));
+      if(headerIdx<0)headerIdx=3; // テンプレート標準位置にフォールバック
+
+      const header=aoa[headerIdx]||[];
+      const timeCol=header.findIndex(c=>String(c).includes('時刻'));
+      const labelCol=header.findIndex(c=>String(c).includes('パート名'));
+      const lockCol=header.findIndex(c=>String(c).includes('ロック'));
+
+      const dataRows=aoa.slice(headerIdx+1).filter(r=>r.some(c=>String(c).trim()!==''));
+      if(!dataRows.length){alert('タイムテーブルの行が見つかりませんでした。');return;}
+
+      const parsed=dataRows.map(r=>{
+        const mins=xlsxTimeToMins(timeCol>=0?r[timeCol]:r[0]);
+        const label=String((labelCol>=0?r[labelCol]:r[1])??'').trim();
+        const locked=lockCol>=0?isLockedCell(r[lockCol]):false;
+        return{mins,label,locked};
+      }).filter(r=>r.mins!==null&&r.label!=='');
+
+      if(!parsed.length){alert('時刻・パート名として読み取れる行がありませんでした。列の並びをご確認ください。');return;}
+
+      if(evName){
+        document.getElementById('wz-evname').value=evName;
+        const n2=document.getElementById('wz-evname2');if(n2)n2.value=evName;
+      }
+      if(evDate){
+        document.getElementById('wz-evdate').value=evDate;
+        const d2=document.getElementById('wz-evdate2');if(d2)d2.value=evDate;
+      }
+
+      wzNid=1;
+      wzRows=parsed.map(r=>({id:wzNid++,baseTime:r.mins,label:r.label,locked:r.locked}));
+      renderWzTable();
+      onEvNameInput();
+      alert(`${parsed.length}件のパートを読み込みました。`);
+    }catch(err){
+      alert('ファイルの読み込みに失敗しました。テンプレート形式のxlsx/csvかご確認ください。');
+    }finally{
+      evt.target.value='';
+    }
+  };
+  if(isCsv)reader.readAsText(file);
+  else reader.readAsArrayBuffer(file);
 }
 
 /* HOME */
