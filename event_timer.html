@@ -881,6 +881,25 @@ function applyTplRows(tpl){
   renderWzTable();
 }
 
+/* EXCEL EXPORT（取り込み形式と同一：シート名「スケジュール」） */
+function exportEventXlsx(id){
+  const ev=getEvent(id);if(!ev)return;
+  if(typeof XLSX==='undefined'){alert('Excelライブラリを読み込めませんでした。通信状態をご確認ください。');return;}
+  const aoa=[
+    ['イベント名',ev.name||''],
+    ['開催日',ev.date||''],
+    [],
+    ['時刻','パート名','ロック']
+  ];
+  ev.rows.forEach(r=>aoa.push([minsToStr(r.baseTime),r.label,r.locked===true?'✓':'']));
+  const ws=XLSX.utils.aoa_to_sheet(aoa);
+  ws['!cols']=[{wch:12},{wch:44},{wch:8}];
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'スケジュール');
+  const safe=(ev.name||'event').replace(/[\\/:*?"<>|]/g,'_').slice(0,40);
+  XLSX.writeFile(wb,`${safe}_timetable.xlsx`);
+}
+
 /* EXCEL IMPORT（香盤表ツール等からのエクスポートに対応） */
 function xlsxTimeToMins(v){
   if(v==null||v==='')return null;
@@ -1011,7 +1030,7 @@ function renderHome(){
     const evDateStr=e.date?formatDate(e.date):'';
     return`<div class="saved-item" onclick="openEvent('${e.id}')">
       <div style="flex:1;min-width:0"><div class="saved-item-name">${esc(e.name||'（無題）')}${evDateStr?` <span style="font-size:13px;color:var(--warn);font-weight:700">📅 ${evDateStr}</span>`:''}</div><div class="saved-item-meta">${ft}〜${lt} ／ ${e.rows.length}パート ／ 更新:${ds}</div></div>
-      <div class="saved-item-right"><button class="si-btn" onclick="event.stopPropagation();editFromHome('${e.id}')">✎</button><button class="si-del" onclick="event.stopPropagation();confirmDel('${e.id}')">✕</button></div>
+      <div class="saved-item-right"><button class="si-btn" title="エクセルに書き出し" onclick="event.stopPropagation();exportEventXlsx('${e.id}')">⬇</button><button class="si-btn" onclick="event.stopPropagation();editFromHome('${e.id}')">✎</button><button class="si-del" onclick="event.stopPropagation();confirmDel('${e.id}')">✕</button></div>
     </div>`;
   }).join('');
 }
